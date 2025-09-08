@@ -26,11 +26,13 @@ import {
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
 import { apiService } from "../../apiservice/api";
+import { useSelector } from "react-redux";
 
 export default function AddEmployee({ open, onClose, onSave }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { user } = useSelector(state => state.auth);
   
   const {
     control,
@@ -288,7 +290,7 @@ export default function AddEmployee({ open, onClose, onSave }) {
                     rules={{ required: "Please select a role" }}
                     render={({ field }) => (
                       <RadioGroup {...field} row>
-                        <FormControlLabel value="admin" control={<Radio />} label="Admin" />
+                        {user.role === 'super_admin' && <FormControlLabel value="admin" control={<Radio />} label="Admin" />}
                         <FormControlLabel value="manager" control={<Radio />} label="Manager" />
                         <FormControlLabel value="employee" control={<Radio />} label="Employee" />
                       </RadioGroup>

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -23,16 +25,18 @@ import {
   Login as LoginIcon,
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { loginUser, clearError } from '../store/authSlice';
 
 export default function Login() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  
+  const { isAuthenticated, isLoading, error } = useSelector(state => state.auth);
   
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const {
     control,
@@ -45,24 +49,37 @@ export default function Login() {
     },
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
   const onSubmit = async (data) => {
-    setIsLoading(true);
-    setError('');
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await dispatch(loginUser(data)).unwrap();
       
-      // For demo purposes, accept any email/password
-      if (data.email && data.password) {
-        navigate('/dashboard');
-      } else {
-        setError('Please enter valid credentials');
+      if (result.success) {
+        // Check if user has temporary password
+        if (result.user && result.user.isTemPassword) {
+          // Redirect to change password page if user has temporary password
+          navigate('/change-password', { replace: true });
+        } else {
+          // Normal redirect to intended page or dashboard
+          const from = location.state?.from?.pathname || '/dashboard';
+          navigate(from, { replace: true });
+        }
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      // Error is handled by Redux
+      console.error('Login failed:', error);
     }
   };
 
@@ -173,6 +190,7 @@ export default function Login() {
                       error={!!errors.email}
                       helperText={errors.email?.message}
                       sx={{ mb: 3 }}
+                      disabled={isLoading}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -203,6 +221,7 @@ export default function Login() {
                       error={!!errors.password}
                       helperText={errors.password?.message}
                       sx={{ mb: 3 }}
+                      disabled={isLoading}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -268,4 +287,5 @@ export default function Login() {
       </Container>
     </Box>
   );
-}
+};
+

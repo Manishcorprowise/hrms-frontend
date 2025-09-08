@@ -8,13 +8,19 @@ import {
     Menu,
     MenuItem,
     Badge,
-    useTheme
+    useTheme,
+    Divider
   } from "@mui/material";
   import MenuIcon from "@mui/icons-material/Menu";
   import NotificationsIcon from "@mui/icons-material/Notifications";
   import Brightness4Icon from "@mui/icons-material/Brightness4";
   import Brightness7Icon from "@mui/icons-material/Brightness7";
+  import LogoutIcon from "@mui/icons-material/Logout";
+  import PersonIcon from "@mui/icons-material/Person";
   import { useState } from "react";
+  import { useDispatch, useSelector } from "react-redux";
+  import { useNavigate } from "react-router-dom";
+  import { logoutUser } from "../store/authSlice";
   import { useThemeContext } from "../theme/ThemeProvider";
   import KAD_Logo from "../assets/KAD_Logo.png";
   
@@ -22,12 +28,34 @@ import {
     const [anchorEl, setAnchorEl] = useState(null);
     const { mode, toggleTheme } = useThemeContext();
     const theme = useTheme();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { user, isLoading } = useSelector(state => state.auth);
   
     const handleMenuOpen = (event) => {
       setAnchorEl(event.currentTarget);
     };
+    
     const handleMenuClose = () => {
       setAnchorEl(null);
+    };
+
+    const handleLogout = async () => {
+      try {
+        await dispatch(logoutUser()).unwrap();
+        navigate('/login');
+      } catch (error) {
+        console.error('Logout failed:', error);
+        // Still redirect to login even if logout API fails
+        navigate('/login');
+      }
+      handleMenuClose();
+    };
+
+    const handleProfile = () => {
+      // Navigate to profile page or show profile dialog
+      console.log('Profile clicked');
+      handleMenuClose();
     };
   
     return (
@@ -147,6 +175,7 @@ import {
             <IconButton 
               onClick={handleMenuOpen} 
               size="small"
+              disabled={isLoading}
               sx={{
                 '&:hover': {
                   backgroundColor: 'action.hover',
@@ -155,15 +184,18 @@ import {
               }}
             >
               <Avatar 
-                alt="Admin User" 
-                src="/avatar.png" 
+                alt={user?.employeeName || "User"} 
                 sx={{ 
                   width: { xs: 32, sm: 40 }, 
                   height: { xs: 32, sm: 40 },
                   border: '2px solid',
                   borderColor: 'divider',
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText'
                 }}
-              />
+              >
+                {user?.employeeName?.charAt(0) || "U"}
+              </Avatar>
             </IconButton>
             <Menu
               anchorEl={anchorEl}
@@ -178,11 +210,25 @@ import {
                     ? '0 4px 20px rgba(0,0,0,0.4)' 
                     : '0 4px 20px rgba(0,0,0,0.15)',
                   mt: 1,
+                  minWidth: 200,
                 }
               }}
             >
+              {/* User Info */}
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  {user?.employeeName || "User"}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {user?.email || ""}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  {user?.role || ""}
+                </Typography>
+              </Box>
+
               <MenuItem 
-                onClick={handleMenuClose}
+                onClick={handleProfile}
                 sx={{
                   '&:hover': {
                     backgroundColor: 'action.hover',
@@ -190,29 +236,25 @@ import {
                   transition: 'background-color 0.2s ease-in-out',
                 }}
               >
+                <PersonIcon sx={{ mr: 1, fontSize: 20 }} />
                 My Profile
               </MenuItem>
+              
+              <Divider />
+              
               <MenuItem 
-                onClick={handleMenuClose}
+                onClick={handleLogout}
+                disabled={isLoading}
                 sx={{
                   '&:hover': {
-                    backgroundColor: 'action.hover',
+                    backgroundColor: 'error.light',
+                    color: 'error.contrastText',
                   },
                   transition: 'background-color 0.2s ease-in-out',
                 }}
               >
-                Settings
-              </MenuItem>
-              <MenuItem 
-                onClick={handleMenuClose}
-                sx={{
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                  },
-                  transition: 'background-color 0.2s ease-in-out',
-                }}
-              >
-                Logout
+                <LogoutIcon sx={{ mr: 1, fontSize: 20 }} />
+                {isLoading ? 'Logging out...' : 'Logout'}
               </MenuItem>
             </Menu>
           </Box>

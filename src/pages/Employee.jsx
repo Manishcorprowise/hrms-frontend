@@ -29,11 +29,13 @@ import {
 import AddEmployee from './AddEmployee';
 import { grey } from '@mui/material/colors';
 import { useNavigate } from 'react-router-dom'; 
+import { useSelector } from 'react-redux';
 export default function Employee() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [addEmployee, setAddEmployee] = useState(false);
+  const { user } = useSelector(state => state.auth);
   // Dummy data
   const newJoiners = [
     { id: 111, name: 'Rubesh', daysAgo: 2 },

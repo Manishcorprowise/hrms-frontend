@@ -12,7 +12,12 @@ import {
   import DashboardIcon from "@mui/icons-material/Dashboard";
   import PeopleIcon from "@mui/icons-material/People";
   import WorkIcon from "@mui/icons-material/Work";
+  import SettingsIcon from "@mui/icons-material/Settings";
+  import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+  import PersonIcon from "@mui/icons-material/Person";
   import { Link, useLocation } from "react-router-dom";
+  import { useSelector } from "react-redux";
+  import { hasRole } from "../utils/roleUtils";
   import { grey } from "@mui/material/colors";
   
   const drawerWidth = 240;
@@ -22,12 +27,53 @@ import {
     const location = useLocation();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { user } = useSelector(state => state.auth);
   
-    const menuItems = [
-      { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-      { text: "Employees", icon: <PeopleIcon />, path: "/employees" },
-    //   { text: "Projects", icon: <WorkIcon />, path: "/projects" },
+    // Define menu items with role requirements
+    const allMenuItems = [
+      { 
+        text: "Dashboard", 
+        icon: <DashboardIcon />, 
+        path: "/dashboard",
+        roles: ['admin', 'super_admin', 'employee'] 
+      },
+      { 
+        text: "My Profile", 
+        icon: <PersonIcon />, 
+        path: "/profile",
+        roles: ['admin', 'super_admin', 'employee']
+      },
+      { 
+        text: "Employees", 
+        icon: <PeopleIcon />, 
+        path: "/employees",
+        roles: ['admin', 'super_admin'] 
+      },
+      { 
+        text: "Projects", 
+        icon: <WorkIcon />, 
+        path: "/projects",
+        roles: ['admin', 'super_admin']
+      },
+      { 
+        text: "Settings", 
+        icon: <SettingsIcon />, 
+        path: "/settings",
+        roles: ['admin', 'super_admin', 'employee']
+      },
+      { 
+        text: "Admin Panel", 
+        icon: <AdminPanelSettingsIcon />, 
+        path: "/admin",
+        roles: ['super_admin'] 
+      },
     ];
+
+    // Filter menu items based on user role
+    const menuItems = allMenuItems.filter(item => {
+      return hasRole(user?.role, item.roles);
+    });
+
 
   
     return (
@@ -61,68 +107,84 @@ import {
       >
         <Toolbar />
         <List sx={{ px: { xs: 1, sm: 0 } }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                component={Link}
-                to={item.path}
-                selected={location.pathname === item.path}
-                sx={{
-                  minHeight: { xs: 44, sm: 48 },
-                  justifyContent: collapsed ? "center" : "initial",
-                  px: { xs: 1.5, sm: 2.5 },
-                  borderRadius: { xs: 1, sm: 0 },
-                  mx: { xs: 0.5, sm: 0 },
-                  color: "text.primary",
-                  transition: "all 0.2s ease-in-out",
-                  "&.Mui-selected": {
-                    bgcolor: "primary.main",
-                    color: "primary.contrastText",
-                    "& .MuiListItemIcon-root": {
+          {menuItems.length > 0 ? (
+            menuItems.map((item) => (
+              <ListItem key={item.text} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
+                  component={Link}
+                  to={item.path}
+                  selected={location.pathname === item.path}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    justifyContent: collapsed ? "center" : "initial",
+                    px: { xs: 1.5, sm: 2.5 },
+                    borderRadius: { xs: 1, sm: 0 },
+                    mx: { xs: 0.5, sm: 0 },
+                    color: "text.primary",
+                    transition: "all 0.2s ease-in-out",
+                    "&.Mui-selected": {
+                      bgcolor: "primary.main",
                       color: "primary.contrastText",
+                      "& .MuiListItemIcon-root": {
+                        color: "primary.contrastText",
+                      },
+                      "&:hover": {
+                        bgcolor: "primary.dark",
+                      },
                     },
                     "&:hover": {
-                      bgcolor: "primary.dark",
+                      bgcolor: theme.palette.mode === 'dark' 
+                        ? "action.hover" 
+                        : "action.selected",
+                      "& .MuiListItemIcon-root": {
+                        color: "primary.main",
+                      },
                     },
-                  },
-                  "&:hover": {
-                    bgcolor: theme.palette.mode === 'dark' 
-                      ? "action.hover" 
-                      : "action.selected",
-                    "& .MuiListItemIcon-root": {
-                      color: "primary.main",
-                    },
-                  },
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    color: "text.secondary",
-                    minWidth: 0,
-                    mr: collapsed ? "auto" : 2,
-                    justifyContent: "center",
-                    fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                    transition: "color 0.2s ease-in-out",
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                {!collapsed && (
-                  <ListItemText 
-                    primary={item.text} 
-                    sx={{ 
-                      "& .MuiListItemText-primary": {
-                        fontSize: { xs: "0.875rem", sm: "1rem" },
-                        fontWeight: 500,
-                        color: "inherit",
-                        transition: "color 0.2s ease-in-out",
-                      }
+                  <ListItemIcon
+                    sx={{
+                      color: "text.secondary",
+                      minWidth: 0,
+                      mr: collapsed ? "auto" : 2,
+                      justifyContent: "center",
+                      fontSize: { xs: "1.2rem", sm: "1.5rem" },
+                      transition: "color 0.2s ease-in-out",
                     }}
-                  />
-                )}
-              </ListItemButton>
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {!collapsed && (
+                    <ListItemText 
+                      primary={item.text} 
+                      sx={{ 
+                        "& .MuiListItemText-primary": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
+                          fontWeight: 500,
+                          color: "inherit",
+                          transition: "color 0.2s ease-in-out",
+                        }
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            ))
+          ) : (
+            <ListItem disablePadding sx={{ display: "block", px: 2, py: 1 }}>
+              <ListItemText 
+                primary="No menu items available" 
+                sx={{ 
+                  color: "text.secondary",
+                  textAlign: "center",
+                  "& .MuiListItemText-primary": {
+                    fontSize: "0.875rem",
+                    fontStyle: "italic",
+                  }
+                }}
+              />
             </ListItem>
-          ))}
+          )}
         </List>
       </Drawer>
     );
