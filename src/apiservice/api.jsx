@@ -119,31 +119,75 @@ export const apiService = {
     }
   },
 
-  // user login and creation apis
-  // create client instance
+  // Personal Details APIs
+  async getPersonalDetails(employeeId) {
+    try {
+      const endpoint = `/personal-details/${employeeId}`;
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error fetching personal details:", error.response?.data || error.message);
+      throw error;
+    }
+  },
 
+  async updatePersonalDetails(employeeId, data) {
+    try {
+      const endpoint = `/personal-details/${employeeId}`;
+      return await this.hitApi("PUT", endpoint, data);
+    } catch (error) {
+      console.error("Error updating personal details:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  async createPersonalDetails(employeeId, data) {
+    try {
+      const endpoint = `/personal-details/${employeeId}`;
+      return await this.hitApi("POST", endpoint, data);
+    } catch (error) {
+      console.error("Error creating personal details:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  // Employee management APIs
   async createEmployee(payload) {
     try {
       const endpoint = "/employee/create";
       return await this.hitApi("POST", endpoint, payload);
     } catch (error) {
-      console.error("Error creating client:", error.data);
+      console.error("Error creating employee:", error.response?.data || error.message);
       throw error;
     }
   },
-  async getEmployees(payload) {
+
+  // Profile/File management APIs
+  async getUserFiles(employeeId) {
     try {
-      const endpoint = `/client/clientInfo?page=${
-        payload.page || ""
-      }&pagesize=${payload.pagesize || ""}&search_string=${
-        payload.search_string || ""
-      }`;
+      const endpoint = `/profile/employee/${employeeId}`;
       return await this.hitApi("GET", endpoint);
     } catch (error) {
-      console.error(
-        "Error fetching clients:",
-        error.response?.data || error.message
-      );
+      console.error("Error fetching user files:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  async uploadFile(employeeId, fileData) {
+    try {
+      const endpoint = `/profile/employee/${employeeId}/upload`;
+      return await this.hitApi("POST", endpoint, fileData, "multipart/form-data");
+    } catch (error) {
+      console.error("Error uploading file:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  async deleteFile(fileId) {
+    try {
+      const endpoint = `/profile/file/${fileId}`;
+      return await this.hitApi("DELETE", endpoint);
+    } catch (error) {
+      console.error("Error deleting file:", error.response?.data || error.message);
       throw error;
     }
   },

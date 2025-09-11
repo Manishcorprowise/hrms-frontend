@@ -23,7 +23,7 @@ export default function AdminLayout({ children }) {
       <Sidebar collapsed={collapsed} onToggle={handleToggleSidebar} mobileOpen={mobileOpen} />
 
       {/* Main Content */}
-      <Box>
+      <Box width="100%">
         <Topbar
           collapsed={collapsed}
           onToggle={handleToggleSidebar}

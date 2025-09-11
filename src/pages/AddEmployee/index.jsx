@@ -50,6 +50,7 @@ export default function AddEmployee({ open, onClose, onSave }) {
       phone: '',
       position: '',
       role: '',
+      department: '',
     },
   });
 

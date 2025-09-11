@@ -7,7 +7,7 @@ export default function Dashboard() {
         Dashboard
       </Typography>
       <Typography>
-        Welcome to the HRMS Dashboard. Here you will see stats and quick links.
+        Welcome to the HRMS Dashboard. Here you will see stats and quick links
       </Typography>
     </>
   );

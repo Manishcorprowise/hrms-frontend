@@ -44,6 +44,7 @@ const ProtectedRoute = ({
         alignItems="center" 
         justifyContent="center" 
         minHeight="100vh"
+        width="100%"
         gap={2}
       >
         <Typography variant="h5" color="error">
@@ -52,19 +53,18 @@ const ProtectedRoute = ({
         <Typography variant="body1" color="text.secondary">
           You don't have permission to access this page.
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        {/* <Typography variant="body2" color="text.secondary">
           Required roles: {requiredRoles.join(', ')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Your role: {user.role}
-        </Typography>
+        </Typography> */}
       </Box>
     );
   }
 
   // Auto-redirect to change password if user has temporary password (except for change-password page itself)
   if (user.isTemPassword && location.pathname !== '/change-password') {
-    console.log('ProtectedRoute: User has temporary password, redirecting to change password. Current path:', location.pathname, 'User isTemPassword:', user.isTemPassword);
     return <Navigate to="/change-password" state={{ from: location }} replace />;
   }
 

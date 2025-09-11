@@ -6,6 +6,8 @@ import Employee from "./pages/Employee";
 import ChangePassword from "./pages/ChangePassword";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import UserProfile from "./pages/UserProfile";
+import UserProfileEdit from "./pages/UserProfile/UserProfileEdit";
 
 export default function App() {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -25,6 +27,8 @@ export default function App() {
                 </ProtectedRoute>
               } />
               <Route path="/" element={<Dashboard />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/profile/edit" element={<UserProfileEdit />} />
             </Routes>
           </AdminLayout>
         </ProtectedRoute>
