@@ -40,7 +40,8 @@ import {
   Description as DocumentIcon,
   Brightness4,
   Brightness7,
-  CloudUpload
+  CloudUpload,
+  AccountBalance as AccountBalanceIcon
 } from '@mui/icons-material';
 import { useThemeContext } from '../../theme/ThemeProvider';
 import FileUpload from '../../components/FileUpload';
@@ -49,9 +50,10 @@ import { useSelector } from 'react-redux';
 const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
   const [expandedSections, setExpandedSections] = useState({
     employment: true,
-    personal: false,
+    personal: true,
     education: false,
-    documents: false
+    documents: false,
+    account: false
   });
   
   // File management state
@@ -82,7 +84,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
   };
 
   const handleFilePreview = (file) => {
-    console.log('Preview file:', file);
+    // Handle file preview
   };
 
   const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -113,6 +115,11 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
       education: initialData?.education || [
         { id: 'edu-1', qualification: '', specialization: '', institution: '', board: '', startDate: '', endDate: '', grade: '', modeOfStudy: 'Full-time', country: '', status: 'Completed' }
       ],
+
+      // Account Details
+      bankAccountNumber: initialData?.account?.bankAccountNumber || '',
+      bankIFSC: initialData?.account?.bankIFSC || '',
+      beneficiaryName: initialData?.account?.beneficiaryName || '',
 
     }
   });
@@ -156,8 +163,6 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
 
 
   const onSubmit = (data) => {
-    console.log('Form data:', data);
-    
     // Format data according to parent component structure
     const formattedData = {
       employment: {
@@ -182,10 +187,14 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
         hobby: data.hobby,
         address: data.address
       },
-      education: data.education || []
+      education: data.education || [],
+      account: {
+        bankAccountNumber: data.bankAccountNumber,
+        bankIFSC: data.bankIFSC,
+        beneficiaryName: data.beneficiaryName
+      }
     };
     
-    console.log('Formatted data:', formattedData);
     onSave(formattedData);
   };
 
@@ -699,6 +708,88 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
           >
             Add Education
           </Button>
+        </FormCard>
+
+        {/* Account Details */}
+        <FormCard
+          title="Account Details"
+          icon={<AccountBalanceIcon color="primary" />}
+          isExpanded={expandedSections.account}
+          onToggle={() => handleSectionToggle('account')}
+        >
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="bankAccountNumber"
+                control={control}
+                rules={{ 
+                  required: 'Bank Account Number is required',
+                  pattern: {
+                    value: /^[0-9]{9,18}$/,
+                    message: 'Please enter a valid account number (9-18 digits)'
+                  }
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Bank Account Number"
+                    placeholder="Enter your bank account number"
+                    error={!!errors.bankAccountNumber}
+                    helperText={errors.bankAccountNumber?.message}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="bankIFSC"
+                control={control}
+                rules={{ 
+                  required: 'Bank IFSC is required',
+                  pattern: {
+                    value: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+                    message: 'Please enter a valid IFSC code (e.g., SBIN0001234)'
+                  }
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Bank IFSC Code"
+                    placeholder="e.g., SBIN0001234"
+                    error={!!errors.bankIFSC}
+                    helperText={errors.bankIFSC?.message}
+                    sx={{ textTransform: 'uppercase' }}
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name="beneficiaryName"
+                control={control}
+                rules={{ 
+                  required: 'Beneficiary Name is required',
+                  minLength: {
+                    value: 2,
+                    message: 'Beneficiary name must be at least 2 characters'
+                  }
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Beneficiary Name"
+                    placeholder="Enter the account holder's name"
+                    error={!!errors.beneficiaryName}
+                    helperText={errors.beneficiaryName?.message}
+                  />
+                )}
+              />
+            </Grid>
+          </Grid>
         </FormCard>
 
         {/* Document Upload & Management */}
