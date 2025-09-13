@@ -161,6 +161,16 @@ export const apiService = {
     }
   },
 
+  async updateEmployee(employeeId, payload) {
+    try {
+      const endpoint = `/employee/update-user/${employeeId}`;
+      return await this.hitApi("PUT", endpoint, payload);
+    } catch (error) {
+      console.error("Error updating employee:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   // Profile/File management APIs
   async getUserFiles(employeeId) {
     try {
@@ -188,6 +198,51 @@ export const apiService = {
       return await this.hitApi("DELETE", endpoint);
     } catch (error) {
       console.error("Error deleting file:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  async getAllEmployees() {
+    try {
+      const endpoint = "/employee/all-users";
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error fetching all employees:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  async getEmployeeById(employeeId) {
+    try {
+      const endpoint = `/employee/get-user/${employeeId}`;
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error fetching employee by ID:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+  async getRoleCodes(payload) {
+    const endpoint = `/role/hrms?isParent=${payload?.isParent || ""}`;
+    return await this.hitApi("GET", endpoint);
+  },
+
+  async getPositions(payload) {
+    const {
+      role_code = "",
+      page = "",
+      pagesize = "",
+      search_string = "",
+    } = payload;
+    const endpoint = `/position/hrms?role_code=${role_code}&page=${page}&pagesize=${pagesize}&search_string=${search_string}`;
+    return await this.hitApi("GET", endpoint);
+  },
+
+  async createUser(payload) {
+    try {
+      const endpoint = "/user/hrms";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error creating user:", error);
       throw error;
     }
   },

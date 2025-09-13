@@ -47,7 +47,7 @@ import { useThemeContext } from '../../theme/ThemeProvider';
 import FileUpload from '../../components/FileUpload';
 import { useSelector } from 'react-redux';
 
-const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
+const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null }) => {
   const [expandedSections, setExpandedSections] = useState({
     employment: true,
     personal: true,
@@ -131,10 +131,11 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
 
   // Load files when component mounts
   useEffect(() => {
-    if (user?.id) {
-      fetchUserFiles(user.id);
+    const userId = targetUserId || user?.id;
+    if (userId) {
+      fetchUserFiles(userId);
     }
-  }, [user?.id]);
+  }, [user?.id, targetUserId]);
 
 
   const handleSectionToggle = (section) => {
@@ -811,7 +812,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData }) => {
             </Box>
           ) : (
             <FileUpload
-              employeeId={user?.id}
+              employeeId={targetUserId || user?.id}
               onUploadSuccess={handleFileUploadSuccess}
               onUploadError={(error) => setError(error.message)}
               existingFiles={userFiles}

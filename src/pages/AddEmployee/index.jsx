@@ -19,6 +19,8 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Select,
+  InputLabel,
 } from "@mui/material";
 import {
   PersonAdd as PersonAddIcon,
@@ -28,7 +30,7 @@ import {
 import { apiService } from "../../apiservice/api";
 import { useSelector } from "react-redux";
 
-export default function AddEmployee({ open, onClose, onSave }) {
+export default function AddEmployee({ open, onClose, onSave, employees = [], editingEmployee = null }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -43,39 +45,71 @@ export default function AddEmployee({ open, onClose, onSave }) {
   } = useForm({
     mode: 'onChange',
     defaultValues: {
-      employeeName: '',
-      employeeNumber: '',
-      dateOfJoining: '',
-      email: '',
-      phone: '',
-      position: '',
-      role: '',
-      department: '',
+      employeeName: editingEmployee?.employeeName || '',
+      employeeNumber: editingEmployee?.employeeNumber || '',
+      dateOfJoining: editingEmployee?.dateOfJoining ? editingEmployee.dateOfJoining.split('T')[0] : '',
+      email: editingEmployee?.email || '',
+      phone: editingEmployee?.phone || '',
+      position: editingEmployee?.position || '',
+      role: editingEmployee?.role || '',
+      department: editingEmployee?.department || '',
+      manager: editingEmployee?.manager || '',
     },
   });
 
+  // Reset form when editingEmployee changes
+  React.useEffect(() => {
+    if (editingEmployee) {
+      reset({
+        employeeName: editingEmployee.employeeName || '',
+        employeeNumber: editingEmployee.employeeNumber || '',
+        dateOfJoining: editingEmployee.dateOfJoining ? editingEmployee.dateOfJoining.split('T')[0] : '',
+        email: editingEmployee.email || '',
+        phone: editingEmployee.phone || '',
+        position: editingEmployee.position || '',
+        role: editingEmployee.role || '',
+        department: editingEmployee.department || '',
+        manager: editingEmployee.manager || '',
+      });
+    } else {
+      reset({
+        employeeName: '',
+        employeeNumber: '',
+        dateOfJoining: '',
+        email: '',
+        phone: '',
+        position: '',
+        role: '',
+        department: '',
+        manager: '',
+      });
+    }
+  }, [editingEmployee, reset]);
+
   const onSubmit = async (data) => {
     try {
-      // Validate all fields before submission
       const isValid = await trigger();
       if (!isValid) {
         setErrorMessage('Please fill in all required fields correctly');
         setShowError(true);
         return;
       }
-
-      console.log("Employee Data:", data);
-      const response = await apiService.createEmployee(data);
-      console.log("Response:", response);
+      
+      let response;
+      if (editingEmployee) {
+        // Update existing employee
+        response = await apiService.updateEmployee(editingEmployee._id, data);
+      } else {
+        // Create new employee
+        response = await apiService.createEmployee(data);
+      }
       
       if (response && response.message) {
         setShowSuccess(true);
         onSave?.(data);
       } else {
-        throw new Error('Failed to create employee');
+        throw new Error(`Failed to ${editingEmployee ? 'update' : 'create'} employee`);
       }
-      
-      // Close dialog after success
       setTimeout(() => {
         reset();
         onClose?.();
@@ -83,7 +117,7 @@ export default function AddEmployee({ open, onClose, onSave }) {
       }, 1500);
     } catch (error) {
       console.error("Error saving employee:", error);
-      setErrorMessage('Failed to save employee. Please try again.');
+      setErrorMessage(`Failed to ${editingEmployee ? 'update' : 'save'} employee. Please try again.`);
       setShowError(true);
     }
   };
@@ -124,7 +158,7 @@ export default function AddEmployee({ open, onClose, onSave }) {
         >
           <PersonAddIcon sx={{ fontSize: 20 }} />
           <Typography >
-            Add New Employee
+            {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
           </Typography>
         </DialogTitle>
 
@@ -304,6 +338,88 @@ export default function AddEmployee({ open, onClose, onSave }) {
                   )}
                 </FormControl>
               </Grid>
+
+              {/* Manager Selection */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name="manager"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth error={!!errors.manager}>
+                      <InputLabel>Select Manager</InputLabel>
+                      <Select
+                        {...field}
+                        label="Select Manager"
+                        displayEmpty
+                        renderValue={(selected) => {
+                          if (!selected) {
+                            return <em style={{ color: '#999' }}>Select a manager</em>;
+                          }
+                          const selectedEmployee = employees.find(emp => emp._id === selected);
+                          return selectedEmployee ? selectedEmployee.employeeName : selected;
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>No Manager</em>
+                        </MenuItem>
+                        {employees
+                          .filter(emp => emp.isActive && emp.role !== 'employee')
+                          .map((employee) => (
+                            <MenuItem key={employee._id} value={employee._id}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box
+                                  sx={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: '50%',
+                                    backgroundColor: 'primary.main',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  {employee.employeeName.split(' ').map(n => n[0]).join('')}
+                                </Box>
+                                <Box>
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {employee.employeeName}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {employee.position} • {employee.role}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </MenuItem>
+                          ))}
+                      </Select>
+                      {errors.manager && (
+                        <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                          {errors.manager.message}
+                        </Typography>
+                      )}
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+
+              {/* Department */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name="department"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Department"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </Grid>
             </Grid>
           </Box>
         </DialogContent>
@@ -324,7 +440,7 @@ export default function AddEmployee({ open, onClose, onSave }) {
             disabled={isSubmitting}
             startIcon={<PersonAddIcon />}
           >
-            {isSubmitting ? 'Saving...' : 'Add Employee'}
+            {isSubmitting ? 'Saving...' : (editingEmployee ? 'Update Employee' : 'Add Employee')}
           </Button>
         </DialogActions>
       </Dialog>

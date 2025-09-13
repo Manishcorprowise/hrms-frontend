@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../../apiservice/api';
 import {
   Box,
@@ -37,6 +38,8 @@ import AccountDetailsTab from './tabs/AccountDetailsTab';
 import { useSelector } from 'react-redux';
 
 const UserProfile = () => {
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +49,7 @@ const UserProfile = () => {
   const [personalData, setPersonalData] = useState(null);
   const [userFiles, setUserFiles] = useState([]);
   const [filesLoading, setFilesLoading] = useState(false);
+  const [targetUser, setTargetUser] = useState(null);
   // Fetch user files
   const fetchUserFiles = async (userId) => {
     try {
@@ -62,11 +66,81 @@ const UserProfile = () => {
 
   // Fetch user data from API
   useEffect(() => {
-
-    if (user?.id) {
+    if (userId) {
+      // Viewing another user's profile
+      fetchTargetUserData();
+    } else if (user?.id) {
+      // Viewing own profile
       fetchUserData();
     }
-  }, [user?.id]);
+  }, [userId, user?.id]);
+
+  const fetchTargetUserData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Fetch target user's basic info
+      const userResponse = await apiService.getEmployeeById(userId);
+      const targetUserData = userResponse.user || userResponse;
+      setTargetUser(targetUserData);
+
+      // Fetch employment details (from target user data)
+      const employmentData = {
+        employeeName: targetUserData?.employeeName || '',
+        employeeId: targetUserData?.employeeNumber || '',
+        email: targetUserData?.email || '',
+        phone: targetUserData?.phone || '',
+        joiningDate: targetUserData?.dateOfJoining || '',
+        position: targetUserData?.position || '',
+        department: targetUserData?.department || '',
+        manager: targetUserData?.manager || ''
+      };
+
+      // Fetch personal details
+      let personalDetailsData = null;
+      try {
+        const response = await apiService.getPersonalDetails(userId);
+        personalDetailsData = response.data;
+        setPersonalData(response.data);
+      } catch (error) {
+        // No personal details found for this user
+      }
+
+      const finalUserData = {
+        employment: employmentData,
+        personal: personalDetailsData || {
+          dateOfBirth: '',
+          nationality: '',
+          maritalStatus: '',
+          placeOfBirth: '',
+          residentialStatus: '',
+          fatherName: '',
+          height: '',
+          weight: '',
+          identificationMark: '',
+          hobby: '',
+          address: ''
+        },
+        education: personalDetailsData?.education || [
+          { qualification: '', specialization: '', institution: '', board: '', startDate: '', endDate: '', grade: '', modeOfStudy: '', country: '', status: 'Completed' }
+        ],
+        // Keep account as array since that's how it comes from API
+        account: personalDetailsData?.account || []
+      };
+      
+      setUserData(finalUserData);
+      
+      // Fetch user files
+      fetchUserFiles(userId);
+    } catch (error) {
+      console.error('Error fetching target user data:', error);
+      setError('Failed to load user profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -146,8 +220,10 @@ const UserProfile = () => {
 
   const handleSave = async (formData) => {
     try {
-
       setLoading(true);
+      
+      // Determine which user ID to use for saving
+      const targetUserId = userId || user.id;
       
       // Prepare personal details data
       const personalDetailsData = {
@@ -158,8 +234,8 @@ const UserProfile = () => {
 
       // Save or update personal details
       const response = personalData 
-        ? await apiService.updatePersonalDetails(user.id, personalDetailsData)
-        : await apiService.createPersonalDetails(user.id, personalDetailsData);
+        ? await apiService.updatePersonalDetails(targetUserId, personalDetailsData)
+        : await apiService.createPersonalDetails(targetUserId, personalDetailsData);
 
       setUserData(prev => ({
         ...prev,
@@ -204,6 +280,7 @@ const UserProfile = () => {
         onSave={handleSave}
         onCancel={handleCancel}
         initialData={userData}
+        targetUserId={userId}
       />
     );
   }
@@ -299,19 +376,38 @@ const UserProfile = () => {
                   </Stack>
                 </Box>
               </Box>
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={() => setIsEditing(!isEditing)}
-                sx={{ 
-                  px: { xs: 2, sm: 3, md: 4 }, 
-                  py: { xs: 1, sm: 1.5, md: 2 },
-                  borderRadius: 2,
-                  minWidth: { xs: 'auto', sm: '140px' }
-                }}
-              >
-                {isEditing ? 'Cancel Edit' : 'Edit Profile'}
-              </Button>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                {userId && (
+                  <Button
+                    variant="outlined"
+                    onClick={() => navigate(-1)}
+                    sx={{ 
+                      px: { xs: 2, sm: 3, md: 4 }, 
+                      py: { xs: 1, sm: 1.5, md: 2 },
+                      borderRadius: 2,
+                      minWidth: { xs: 'auto', sm: '120px' }
+                    }}
+                  >
+                    Back
+                  </Button>
+                )}
+                {/* Show edit button for own profile or if user has admin permissions */}
+                {(!userId || (user?.role === 'admin' || user?.role === 'super_admin')) && (
+                  <Button
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    onClick={() => setIsEditing(!isEditing)}
+                    sx={{ 
+                      px: { xs: 2, sm: 3, md: 4 }, 
+                      py: { xs: 1, sm: 1.5, md: 2 },
+                      borderRadius: 2,
+                      minWidth: { xs: 'auto', sm: '140px' }
+                    }}
+                  >
+                    {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+                  </Button>
+                )}
+              </Box>
             </Box>
 
             {/* Employee Details Grid in Header */}

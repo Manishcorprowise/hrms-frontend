@@ -2,12 +2,12 @@ import { Routes, Route } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
-import Employee from "./pages/Employee";
 import ChangePassword from "./pages/ChangePassword";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfile from "./pages/UserProfile";
 import UserProfileEdit from "./pages/UserProfile/UserProfileEdit";
+import Employee from "./pages/EmployeePage/Employee";
 
 export default function App() {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -28,6 +28,7 @@ export default function App() {
               } />
               <Route path="/" element={<Dashboard />} />
               <Route path="/profile" element={<UserProfile />} />
+              <Route path="/profile/:userId" element={<UserProfile />} />
               <Route path="/profile/edit" element={<UserProfileEdit />} />
             </Routes>
           </AdminLayout>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -26,43 +26,137 @@ import {
   Chat,
   PersonAdd,
 } from '@mui/icons-material';
-import AddEmployee from './AddEmployee';
-import { grey } from '@mui/material/colors';
-import { useNavigate } from 'react-router-dom'; 
+import AddEmployee from '../AddEmployee/index';
+import EmployeeTable from '../../components/EmployeeTable';
 import { useSelector } from 'react-redux';
+import { apiService } from '../../apiservice/api';
 export default function Employee() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [addEmployee, setAddEmployee] = useState(false);
-  const { user } = useSelector(state => state.auth);
-  // Dummy data
-  const newJoiners = [
-    { id: 111, name: 'Rubesh', daysAgo: 2 },
-    { id: 123, name: 'Arvind', daysAgo: 3 },
-    { id: 112, name: 'Manish Yadav', daysAgo: 3 },
-  ];
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [allEmployees, setAllEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    fetchAllEmployees();
+  }, []);
+  // Calculate new joiners from actual employee data
+  const newJoiners = useMemo(() => {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    return allEmployees
+      .filter(emp => {
+        if (!emp.dateOfJoining) return false;
+        const joiningDate = new Date(emp.dateOfJoining);
+        return joiningDate >= oneMonthAgo;
+      })
+      .map(emp => {
+        const joiningDate = new Date(emp.dateOfJoining);
+        const daysAgo = Math.floor((new Date() - joiningDate) / (1000 * 60 * 60 * 24));
+        return {
+          id: emp.employeeNumber,
+          name: emp.employeeName,
+          daysAgo: daysAgo,
+          _id: emp._id
+        };
+      })
+      .sort((a, b) => b.daysAgo - a.daysAgo); // Sort by most recent first
+  }, [allEmployees]);
+  // Calculate upcoming birthdays from actual employee data
+  const upcomingBirthdays = useMemo(() => {
+    const today = new Date();
+    const oneWeekFromNow = new Date();
+    oneWeekFromNow.setDate(today.getDate() + 7);
+    
+    return allEmployees
+      .filter(emp => {
+        if (!emp.dateOfBirth) return false;
+        const birthDate = new Date(emp.dateOfBirth);
+        const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+        
+        // If birthday has passed this year, check next year
+        if (thisYearBirthday < today) {
+          thisYearBirthday.setFullYear(today.getFullYear() + 1);
+        }
+        
+        return thisYearBirthday >= today && thisYearBirthday <= oneWeekFromNow;
+      })
+      .map(emp => {
+        const birthDate = new Date(emp.dateOfBirth);
+        const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+        
+        // If birthday has passed this year, use next year
+        if (thisYearBirthday < today) {
+          thisYearBirthday.setFullYear(today.getFullYear() + 1);
+        }
+        
+        return {
+          id: emp.employeeNumber,
+          name: emp.employeeName,
+          date: thisYearBirthday.toLocaleDateString('en-US', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+          }),
+          _id: emp._id
+        };
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [allEmployees]);
+  // Calculate resigned employees from actual employee data
+  const resignedEmployees = useMemo(() => {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    return allEmployees
+      .filter(emp => emp.isDeleted || !emp.isActive)
+      .map(emp => {
+        const resignationDate = emp.deletedAt ? new Date(emp.deletedAt) : new Date();
+        const daysAgo = Math.floor((new Date() - resignationDate) / (1000 * 60 * 60 * 24));
+        return {
+          id: emp.employeeNumber,
+          name: emp.employeeName,
+          daysAgo: daysAgo,
+          _id: emp._id
+        };
+      })
+      .sort((a, b) => b.daysAgo - a.daysAgo);
+  }, [allEmployees]);
 
-  const upcomingBirthdays = [
-    { 
-      id: 'T0019', 
-      name: 'Aadesh Hiralal So...', 
-      date: '10 Sep 2025',
-      avatar: '/api/placeholder/40/40'
-    },
-  ];
-
-  const resignedEmployees = []; // Empty for now
-
-  const joiningAnniversaries = [
-    { 
-      id: 'T0019', 
-      name: 'Aadesh Hiralal So...', 
-      date: '09 Sep 2020',
-      years: 5,
-      avatar: '/api/placeholder/40/40'
-    },
-  ];
+  // Calculate joining anniversaries from actual employee data
+  const joiningAnniversaries = useMemo(() => {
+    const today = new Date();
+    const oneWeekFromNow = new Date();
+    oneWeekFromNow.setDate(today.getDate() + 7);
+    
+    return allEmployees
+      .filter(emp => {
+        if (!emp.dateOfJoining) return false;
+        const joiningDate = new Date(emp.dateOfJoining);
+        const thisYearAnniversary = new Date(today.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
+        
+        return thisYearAnniversary >= today && thisYearAnniversary <= oneWeekFromNow;
+      })
+      .map(emp => {
+        const joiningDate = new Date(emp.dateOfJoining);
+        const years = today.getFullYear() - joiningDate.getFullYear();
+        const thisYearAnniversary = new Date(today.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
+        
+        return {
+          id: emp.employeeNumber,
+          name: emp.employeeName,
+          date: thisYearAnniversary.toLocaleDateString('en-US', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+          }),
+          years: years,
+          _id: emp._id
+        };
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [allEmployees]);
 
   const CardComponent = ({ title, children, showAddButton = false, onAddClick }) => (
     <Card 
@@ -155,6 +249,60 @@ export default function Employee() {
     </Box>
   );
 
+  const fetchAllEmployees = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await apiService.getAllEmployees();
+      setAllEmployees(response.users || response);
+    } catch (error) {
+      console.error("Error fetching all employees:", error.response?.data || error.message);
+      setError('Failed to fetch employees. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditEmployee = (employee) => {
+    setEditingEmployee(employee);
+    setAddEmployee(true);
+  };
+
+  const handleDeleteEmployee = (employee) => {
+    console.log('Delete employee:', employee);
+    if (window.confirm(`Are you sure you want to delete ${employee.employeeName}?`)) {
+      // Implement delete functionality
+      setAllEmployees(prev => prev.filter(emp => emp._id !== employee._id));
+    }
+  };
+
+  const handleViewEmployee = (employee) => {
+    console.log('View employee:', employee);
+    // The view functionality is handled by the table component itself
+  };
+
+  const handleCloseDialog = () => {
+    setAddEmployee(false);
+    setEditingEmployee(null);
+  };
+
+  const handleSaveEmployee = (employeeData) => {
+    if (editingEmployee) {
+      // Update existing employee
+      console.log('Updating employee:', employeeData);
+      
+      // Here you would call the update API
+      // After successful update, refresh the employee list
+      fetchAllEmployees();
+    } else {
+      // Add new employee
+      console.log('Adding new employee:', employeeData);
+      // After successful add, refresh the employee list
+      fetchAllEmployees();
+    }
+    handleCloseDialog();
+  };
+
   return (
     <Box 
       sx={{ 
@@ -165,10 +313,9 @@ export default function Employee() {
       }}
     >
       <Grid container spacing={1} sx={{ p: 3 }}>
-        {/* New Joiners Card */}
         <Grid item xs={12} sm={6} lg={3}>
           <CardComponent 
-            title="New Joiners for Last 1 Month" 
+            title="New Joiners for Last 1 Month"
             showAddButton={true}
             onAddClick={() => setAddEmployee(true)}
           >
@@ -218,7 +365,6 @@ export default function Employee() {
           </CardComponent>
         </Grid>
 
-        {/* Upcoming Birthdays Card */}
         <Grid item xs={12} sm={6} lg={3}>
           <CardComponent title="Upcoming Birthdays for a week">
             {upcomingBirthdays.length > 0 ? (
@@ -268,7 +414,6 @@ export default function Employee() {
           </CardComponent>
         </Grid>
 
-        {/* Resigned Employees Card */}
         <Grid item xs={12} sm={6} lg={3}>
           <CardComponent 
             title="Resigned Employees for Last 1 Month" 
@@ -299,7 +444,6 @@ export default function Employee() {
           </CardComponent>
         </Grid>
 
-        {/* Joining Anniversary Card */}
         <Grid item xs={12} sm={6} lg={3}>
           <CardComponent title="Joining Anniversary for a week">
             {joiningAnniversaries.length > 0 ? (
@@ -350,7 +494,85 @@ export default function Employee() {
         </Grid>
       </Grid>
 
-      {/* Floating Action Button for Chat */}
+      {/* All Employees Table Section */}
+      <Box sx={{ mt: 4 }}>
+        <Card 
+          sx={{ 
+            backgroundColor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+            boxShadow: theme.palette.mode === 'dark' 
+              ? '0 2px 8px rgba(0,0,0,0.3)' 
+              : '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Box>
+                <Typography 
+                  variant="h5" 
+                  fontWeight={700} 
+                  gutterBottom
+                  sx={{ color: 'text.primary' }}
+                >
+                  All Employees
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage and view all employees in your organization
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Chip
+                  label={`Total: ${allEmployees.length}`}
+                  color="primary"
+                  variant="outlined"
+                />
+                <Chip
+                  label={`Active: ${allEmployees.filter(emp => emp.isActive).length}`}
+                  color="success"
+                  variant="outlined"
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={() => setAddEmployee(true)}
+                  sx={{
+                    backgroundColor: 'primary.main',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    boxShadow: 'none',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
+                      boxShadow: 2,
+                    },
+                  }}
+                >
+                  Add Employee
+                </Button>
+              </Box>
+            </Box>
+            
+            {error && (
+              <Box sx={{ mb: 2 }}>
+                <Typography color="error" variant="body2">
+                  {error}
+                </Typography>
+              </Box>
+            )}
+
+            <EmployeeTable
+              employees={allEmployees}
+              onEdit={handleEditEmployee}
+              onDelete={handleDeleteEmployee}
+              onView={handleViewEmployee}
+              onEditEmployee={handleEditEmployee}
+              loading={loading}
+            />
+          </CardContent>
+        </Card>
+      </Box>
+
       <Fab
         color="primary"
         aria-label="chat"
@@ -380,7 +602,10 @@ export default function Employee() {
   
       <AddEmployee
         open={addEmployee}
-        onClose={() => setAddEmployee(false)}
+        onClose={handleCloseDialog}
+        employees={allEmployees}
+        editingEmployee={editingEmployee}
+        onSave={handleSaveEmployee}
       />
     </Box>
   );
