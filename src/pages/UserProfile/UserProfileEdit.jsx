@@ -200,18 +200,29 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
   };
 
   const FormCard = ({ title, children, icon, isExpanded, onToggle }) => (
-    <Card sx={{ mb: 3, boxShadow: 2 }}>
+    <Card sx={{ 
+      mb: { xs: 2, sm: 3 }, 
+      boxShadow: 2,
+      mx: { xs: -1, sm: 0 }
+    }}>
       <Accordion expanded={isExpanded} onChange={onToggle}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box display="flex" alignItems="center" width="100%">
             {icon}
-            <Typography variant="h6" sx={{ ml: 1, fontWeight: 600 }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                ml: 1, 
+                fontWeight: 600,
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}
+            >
               {title}
             </Typography>
           </Box>
         </AccordionSummary>
         <AccordionDetails>
-          <CardContent sx={{ pt: 0 }}>
+          <CardContent sx={{ pt: 0, px: { xs: 2, sm: 3 } }}>
             {children}
           </CardContent>
         </AccordionDetails>
@@ -220,19 +231,48 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
   );
 
   return (
-    <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
+    <Box sx={{ 
+      p: { xs: 2, sm: 3 }, 
+      backgroundColor: 'background.default', 
+      minHeight: '100vh' 
+    }}>
       {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" fontWeight={600}>
+      <Box 
+        display="flex" 
+        flexDirection={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between" 
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        mb={4}
+        gap={{ xs: 2, sm: 0 }}
+      >
+        <Typography 
+          variant="h4" 
+          fontWeight={600}
+          sx={{ 
+            fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' },
+            mb: { xs: 1, sm: 0 }
+          }}
+        >
           Update Profile
         </Typography>
-        <Stack direction="row" spacing={2} alignItems="center">
-          
+        <Stack 
+          direction="row" 
+          spacing={{ xs: 1, sm: 2 }} 
+          alignItems="center"
+          sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'flex-end', sm: 'flex-start' }
+          }}
+        >
           <Button
             variant="outlined"
             startIcon={<CancelIcon />}
             onClick={onCancel}
-            sx={{ px: 3 }}
+            sx={{ 
+              px: { xs: 2, sm: 3 },
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              minWidth: { xs: 'auto', sm: 'auto' }
+            }}
           >
             Cancel
           </Button>
@@ -240,7 +280,11 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
             variant="contained"
             startIcon={<SaveIcon />}
             onClick={handleSubmit(onSubmit)}
-            sx={{ px: 3 }}
+            sx={{ 
+              px: { xs: 2, sm: 3 },
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              minWidth: { xs: 'auto', sm: 'auto' }
+            }}
           >
             Save Changes
           </Button>
@@ -404,13 +448,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                 )}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} sx={{ minWidth: 120 }}>
               <Controller
                 name="maritalStatus"
                 control={control}
                 render={({ field }) => (
                   <FormControl fullWidth>
-                    <InputLabel>Marital Status</InputLabel>
+                    <InputLabel id="demo-simple-select-label">Marital Status</InputLabel>
                     <Select {...field} label="Marital Status">
                       <MenuItem value="Single">Single</MenuItem>
                       <MenuItem value="Married">Married</MenuItem>
@@ -434,7 +478,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                 )}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} sx={{ minWidth: 120 }}>
               <Controller
                 name="residentialStatus"
                 control={control}
@@ -654,7 +698,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} sx={{ minWidth: 120 }}>
                   <Controller
                     name={`education.${index}.modeOfStudy`}
                     control={control}
@@ -683,7 +727,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} sx={{ minWidth: 120 }}>
                   <Controller
                     name={`education.${index}.status`}
                     control={control}

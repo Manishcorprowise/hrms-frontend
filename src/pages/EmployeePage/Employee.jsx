@@ -508,31 +508,75 @@ export default function Employee() {
           }}
         >
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Box>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: { xs: 2, sm: 0 },
+                mb: 3 
+              }}
+            >
+              <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
                 <Typography 
                   variant="h5" 
                   fontWeight={700} 
                   gutterBottom
-                  sx={{ color: 'text.primary' }}
+                  sx={{ 
+                    color: 'text.primary',
+                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '1.875rem' }
+                  }}
                 >
                   All Employees
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontSize: { xs: '0.875rem', sm: '0.9375rem' }
+                  }}
+                >
                   Manage and view all employees in your organization
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <Chip
-                  label={`Total: ${allEmployees.length}`}
-                  color="primary"
-                  variant="outlined"
-                />
-                <Chip
-                  label={`Active: ${allEmployees.filter(emp => emp.isActive).length}`}
-                  color="success"
-                  variant="outlined"
-                />
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  gap: { xs: 1.5, sm: 2 }, 
+                  alignItems: { xs: 'stretch', sm: 'center' },
+                  width: { xs: '100%', sm: 'auto' },
+                  minWidth: { xs: 'auto', sm: 'fit-content' }
+                }}
+              >
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    gap: { xs: 1, sm: 1.5 },
+                    flexWrap: 'wrap',
+                    justifyContent: { xs: 'flex-start', sm: 'flex-end' }
+                  }}
+                >
+                  <Chip
+                    label={`Total: ${allEmployees.length}`}
+                    color="primary"
+                    variant="outlined"
+                    sx={{
+                      fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                      height: { xs: '28px', sm: '32px' }
+                    }}
+                  />
+                  <Chip
+                    label={`Active: ${allEmployees.filter(emp => emp.isActive).length}`}
+                    color="success"
+                    variant="outlined"
+                    sx={{
+                      fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                      height: { xs: '28px', sm: '32px' }
+                    }}
+                  />
+                </Box>
                 <Button
                   variant="contained"
                   startIcon={<Add />}
@@ -542,6 +586,11 @@ export default function Employee() {
                     textTransform: 'none',
                     fontWeight: 500,
                     boxShadow: 'none',
+                    fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 1, sm: 1.5 },
+                    minWidth: { xs: 'auto', sm: 'auto' },
+                    width: { xs: '100%', sm: 'auto' },
                     '&:hover': {
                       backgroundColor: 'primary.dark',
                       boxShadow: 2,
