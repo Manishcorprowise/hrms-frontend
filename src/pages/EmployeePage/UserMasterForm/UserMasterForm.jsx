@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import Select from "react-select";
+import { hrmsConfig } from '../../../apiservice/apiConfig';
 import {
   Button,
   Dialog,
@@ -29,6 +30,13 @@ export const UserMasterFrom = ({
   onClose,
   dataToEdit = null,
 }) => {
+  console.log('HRMS Key:', hrmsConfig.hrmsKey);
+  
+  // Check if HRMS key is available
+  if (!hrmsConfig.hrmsKey) {
+    console.error('VITE_HRMS_KEY environment variable is not set!');
+    console.error('Please create a .env file in your project root with: VITE_HRMS_KEY=your_key_here');
+  }
   const {
     control,
     register,
@@ -81,7 +89,7 @@ export const UserMasterFrom = ({
     try {
       const response = await axios.get(`${apiURLs}/api/role/hrms`, {
         headers: {
-          'hrms_key': 'cb0932cb5dfe47213-a5dcc6e1'
+          'hrms_key': hrmsConfig.hrmsKey
         }
       });
       if (response.status === 200) {
@@ -102,7 +110,7 @@ export const UserMasterFrom = ({
     try {
       const response = await axios.get(`${apiURLs}/api/position/hrms?role_code=${role_code}`, {
         headers: {
-          'hrms_key': 'cb0932cb5dfe47213-a5dcc6e1'
+          'hrms_key': hrmsConfig.hrmsKey
         }
       });
       if (response.status) {
@@ -120,12 +128,27 @@ export const UserMasterFrom = ({
 
   const onSubmit = async (data) => {
     try {
+      if (!hrmsConfig.hrmsKey) {
+        console.error('Cannot submit: HRMS key is not configured');
+        alert('HRMS key is not configured. Please check your environment variables.');
+        return;
+      }
 
       const response = await axios.post(`${apiURLs}/api/user/hrms`,data, {
         headers: {
-          'hrms_key': 'cb0932cb5dfe47213-a5dcc6e1'
+          'hrms_key': hrmsConfig.hrmsKey
         },
       });
+      console.log(response);
+      if (response.status === 200) {
+        try {
+          response = await apiService.updateEmployee(dataToEdit._id, {kadCred:true});
+          console.log(response);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
     } catch (error) {
       console.log(error);
     }

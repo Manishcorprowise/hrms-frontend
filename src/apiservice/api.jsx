@@ -164,7 +164,7 @@ export const apiService = {
   async updateEmployee(employeeId, payload) {
     try {
       const endpoint = `/employee/update-user/${employeeId}`;
-      return await this.hitApi("PUT", endpoint, payload);
+      return await this.hitApi("PATCH", endpoint, payload);
     } catch (error) {
       console.error("Error updating employee:", error.response?.data || error.message);
       throw error;

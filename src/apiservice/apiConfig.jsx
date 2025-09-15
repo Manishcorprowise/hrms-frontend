@@ -4,3 +4,9 @@ export const apiUrl = {
   // apiEndPoint: "https://5b6e90335985.ngrok-free.app",
   //  apiEndPoint: 'https://api.kadconnect.ca/api',
 };
+
+export const hrmsConfig = {
+  hrmsKey: import.meta.env.VITE_HRMS_KEY || 
+           (typeof __VITE_HRMS_KEY__ !== 'undefined' ? __VITE_HRMS_KEY__ : null)
+};
+

@@ -410,10 +410,12 @@ const EmployeeTable = ({ employees, onEdit, onDelete, onView, loading = false, o
           <EditIcon sx={{ mr: 1 }} />
           Edit
         </MenuItem>
-        <MenuItem onClick={handleGenerateKadCredentials} sx={{ color: 'primary.main' }}>
-          <KeyIcon sx={{ mr: 1 }} />
-          Generate kad cred
-        </MenuItem>
+        {selectedEmployee?.isActive && selectedEmployee?.kadCred !== true && (
+          <MenuItem onClick={handleGenerateKadCredentials} sx={{ color: 'primary.main' }}>
+            <KeyIcon sx={{ mr: 1 }} />
+            Generate kad cred
+          </MenuItem>
+        )}
         <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
           <DeleteIcon sx={{ mr: 1 }} />
           Delete
