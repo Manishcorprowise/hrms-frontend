@@ -55,7 +55,24 @@ const UserProfile = () => {
     try {
       setFilesLoading(true);
       const response = await apiService.getUserFiles(userId);
-      setUserFiles(response.data || []);
+      
+      // Handle the nested categories structure
+      let files = [];
+      if (response.data && response.data.categories) {
+        // Flatten the categories structure into a single array
+        Object.values(response.data.categories).forEach(category => {
+          if (category.files && Array.isArray(category.files)) {
+            // Add category property to each file for filtering
+            const filesWithCategory = category.files.map(file => ({
+              ...file,
+              category: category.category
+            }));
+            files = [...files, ...filesWithCategory];
+          }
+        });
+      }
+      
+      setUserFiles(files);
     } catch (error) {
       console.error('Error fetching user files:', error);
       setUserFiles([]);
@@ -740,6 +757,7 @@ const UserProfile = () => {
               userFiles={userFiles}
               filesLoading={filesLoading}
               onEdit={handleEdit}
+              employeeDetails={targetUser || user}
             />
           )}
           {activeTab === 3 && <AccountDetailsTab userData={userData} />}

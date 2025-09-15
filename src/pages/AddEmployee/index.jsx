@@ -21,6 +21,8 @@ import {
   Radio,
   Select,
   InputLabel,
+  Switch,
+  FormControlLabel as MuiFormControlLabel,
 } from "@mui/material";
 import {
   PersonAdd as PersonAddIcon,
@@ -40,6 +42,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
     trigger,
   } = useForm({
@@ -54,6 +57,9 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
       role: editingEmployee?.role || '',
       department: editingEmployee?.department || '',
       manager: editingEmployee?.manager || '',
+      isActive: editingEmployee?.isActive !== undefined ? editingEmployee.isActive : true,
+      endDate: editingEmployee?.endDate ? editingEmployee.endDate.split('T')[0] : '',
+      managerId: editingEmployee?.managerId || '',
     },
   });
 
@@ -70,6 +76,9 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         role: editingEmployee.role || '',
         department: editingEmployee.department || '',
         manager: editingEmployee.manager || '',
+        isActive: editingEmployee.isActive !== undefined ? editingEmployee.isActive : true,
+        endDate: editingEmployee.endDate ? editingEmployee.endDate.split('T')[0] : '',
+        managerId: editingEmployee.managerId || (typeof editingEmployee.manager === 'string' && editingEmployee.manager ? employees.find(emp => emp.employeeName === editingEmployee.manager)?._id || '' : ''),
       });
     } else {
       reset({
@@ -82,9 +91,15 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         role: '',
         department: '',
         manager: '',
+        isActive: true,
+        endDate: '',
+        managerId: '',
       });
     }
   }, [editingEmployee, reset]);
+
+  // Watch the isActive field to show/hide end date
+  const isActive = watch('isActive');
 
   const onSubmit = async (data) => {
     try {
@@ -95,13 +110,21 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         return;
       }
       
+      // Transform the data for API submission
+      const submitData = {
+        ...data,
+        manager: data.managerId, // Send managerId as manager field
+        managerId: undefined // Remove managerId field
+      };
+      delete submitData.managerId; // Clean up the managerId field
+      
       let response;
       if (editingEmployee) {
         // Update existing employee
-        response = await apiService.updateEmployee(editingEmployee._id, data);
+        response = await apiService.updateEmployee(editingEmployee._id, submitData);
       } else {
         // Create new employee
-        response = await apiService.createEmployee(data);
+        response = await apiService.createEmployee(submitData);
       }
       
       if (response && response.message) {
@@ -342,10 +365,10 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
               {/* Manager Selection */}
               <Grid item xs={12} sm={6}>
                 <Controller
-                  name="manager"
+                  name="managerId"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.manager}>
+                    <FormControl fullWidth error={!!errors.managerId}>
                       <InputLabel>Select Manager</InputLabel>
                       <Select
                         {...field}
@@ -358,8 +381,20 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                             return <em style={{ color: '#999' }}>Select a manager</em>;
                           }
                           
+                          // First try to find by ID
                           const selectedEmployee = employees.find(emp => emp._id === selected);
-                          return selectedEmployee ? selectedEmployee.employeeName : 'Unknown';
+                          if (selectedEmployee) {
+                            return selectedEmployee.employeeName;
+                          }
+                          
+                          // If not found by ID, try to find by name (for backward compatibility)
+                          const selectedByName = employees.find(emp => emp.employeeName === selected);
+                          if (selectedByName) {
+                            return selectedByName.employeeName;
+                          }
+                          
+                          // If still not found, return the selected value
+                          return selected;
                         }}
                       >
                         <MenuItem value="">
@@ -398,9 +433,9 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                             </MenuItem>
                           ))}
                       </Select>
-                      {errors.manager && (
+                      {errors.managerId && (
                         <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                          {errors.manager.message}
+                          {errors.managerId.message}
                         </Typography>
                       )}
                     </FormControl>
@@ -423,6 +458,75 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                   )}
                 />
               </Grid>
+
+              {/* Active Status Toggle */}
+              <Grid item xs={12}>
+                <Controller
+                  name="isActive"
+                  control={control}
+                  render={({ field }) => (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        p: 2,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        backgroundColor: 'background.paper',
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          Employee Status
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {field.value ? 'Employee is active and can access the system' : 'Employee is inactive and cannot access the system'}
+                        </Typography>
+                      </Box>
+                      <MuiFormControlLabel
+                        control={
+                          <Switch
+                            checked={field.value}
+                            onChange={field.onChange}
+                            color="primary"
+                            size="medium"
+                          />
+                        }
+                        label={field.value ? 'Active' : 'Inactive'}
+                        labelPlacement="start"
+                        sx={{ m: 0 }}
+                      />
+                    </Box>
+                  )}
+                />
+              </Grid>
+
+              {/* End Date - Show only when isActive is false */}
+              {!isActive && (
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="endDate"
+                    control={control}
+                    rules={{ 
+                      required: !isActive ? 'End date is required when employee is inactive' : false 
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        type="date"
+                        label="End Date"
+                        InputLabelProps={{ shrink: true }}
+                        error={!!errors.endDate}
+                        helperText={errors.endDate?.message}
+                        variant="outlined"
+                      />
+                    )}
+                  />
+                </Grid>
+              )}
             </Grid>
           </Box>
         </DialogContent>

@@ -23,6 +23,8 @@ import {
   import { logoutUser } from "../store/authSlice";
   import { useThemeContext } from "../theme/ThemeProvider";
   import KAD_Logo from "../assets/KAD_Logo.png";
+  import { Link } from "react-router-dom";
+
   
   export default function Topbar({ onToggle }) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -54,6 +56,7 @@ import {
 
     const handleProfile = () => {
       // Navigate to profile page or show profile dialog
+      navigate('/profile');
       console.log('Profile clicked');
       handleMenuClose();
     };

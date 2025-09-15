@@ -71,7 +71,7 @@ export default function Employee() {
     
     return allEmployees
       .filter(emp => {
-        if (!emp.dateOfBirth) return false;
+        if (!emp.dateOfBirth || !emp.isActive || emp.isDeleted) return false;
         const birthDate = new Date(emp.dateOfBirth);
         const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
         
@@ -110,14 +110,20 @@ export default function Employee() {
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
     
     return allEmployees
-      .filter(emp => emp.isDeleted || !emp.isActive)
+      .filter(emp => emp.isDeleted || (!emp.isActive && emp.endDate))
       .map(emp => {
-        const resignationDate = emp.deletedAt ? new Date(emp.deletedAt) : new Date();
+        const resignationDate = emp.endDate ? new Date(emp.endDate) : (emp.deletedAt ? new Date(emp.deletedAt) : new Date());
         const daysAgo = Math.floor((new Date() - resignationDate) / (1000 * 60 * 60 * 24));
         return {
           id: emp.employeeNumber,
           name: emp.employeeName,
           daysAgo: daysAgo,
+          endDate: emp.endDate,
+          lwd: resignationDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          }),
           _id: emp._id
         };
       })
@@ -132,7 +138,7 @@ export default function Employee() {
     
     return allEmployees
       .filter(emp => {
-        if (!emp.dateOfJoining) return false;
+        if (!emp.dateOfJoining || !emp.isActive || emp.isDeleted) return false;
         const joiningDate = new Date(emp.dateOfJoining);
         const thisYearAnniversary = new Date(today.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
         
@@ -417,8 +423,7 @@ export default function Employee() {
         <Grid item xs={12} sm={6} lg={3}>
           <CardComponent 
             title="Resigned Employees for Last 1 Month" 
-            showAddButton={true}
-            onAddClick={() => setAddEmployee(true)}
+            showAddButton={false}
           >
             {resignedEmployees.length > 0 ? (
               <List sx={{ p: 0 }}>
@@ -431,7 +436,7 @@ export default function Employee() {
                     </ListItemAvatar>
                     <ListItemText
                       primary={`${employee.name} (${employee.id})`}
-                      secondary={`${employee.daysAgo} days ago`}
+                      secondary={`LWD: ${employee.lwd}`}
                       primaryTypographyProps={{ fontWeight: 500 }}
                       secondaryTypographyProps={{ color: 'text.secondary' }}
                     />

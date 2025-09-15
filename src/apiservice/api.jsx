@@ -185,7 +185,7 @@ export const apiService = {
   async uploadFile(fileData) {
     try {
       const endpoint = `/document/upload`;
-      return await this.hitApi("POST", endpoint, fileData, "multipart/form-data");
+      return await this.hitApi("POST", endpoint, fileData, "application/json");
     } catch (error) {
       console.error("Error uploading file:", error.response?.data || error.message);
       throw error;

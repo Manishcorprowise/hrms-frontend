@@ -52,8 +52,12 @@ const FileUploadManagement = ({
 }) => {
   // Document categories
   const documentCategories = [
-    { id: 'aadhaar', name: 'Aadhaar Card', required: true, maxFiles: 1 },
-    { id: 'marksheet', name: 'Marksheet', required: true, maxFiles: 5 },
+    { id: 'aadhaar', name: 'Aadhaar Card', required: false, maxFiles: 2 },
+    { id: 'profile', name: 'Profile Picture', required: false, maxFiles: 2 },
+    { id: 'identity', name: 'Identity Proof', required: false, maxFiles: 2 },
+    { id: 'address', name: 'Address Proof', required: false, maxFiles: 2 },
+    { id: 'education', name: 'Education Certificate', required: false, maxFiles: 2 },
+    { id: 'experience', name: 'Experience Letter', required: false, maxFiles: 2 },
     { id: 'other', name: 'Other Documents', required: false, maxFiles: 10 }
   ];
 
@@ -64,6 +68,7 @@ const FileUploadManagement = ({
   const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
   const [previewDialog, setPreviewDialog] = useState({ open: false, file: null });
+  const [filesReady, setFilesReady] = useState(false);
 
   // Initialize selected files state
   useEffect(() => {
@@ -79,10 +84,28 @@ const FileUploadManagement = ({
     try {
       setLoading(true);
       const response = await apiService.getUserFiles(employeeId);
-      setUserFiles(response.data || []);
+      
+      // Handle the nested categories structure
+      let files = [];
+      if (response.data && response.data.categories) {
+        // Flatten the categories structure into a single array
+        Object.values(response.data.categories).forEach(category => {
+          if (category.files && Array.isArray(category.files)) {
+            // Add category property to each file for filtering
+            const filesWithCategory = category.files.map(file => ({
+              ...file,
+              category: category.category
+            }));
+            files = [...files, ...filesWithCategory];
+          }
+        });
+      }
+      
+      setUserFiles(files);
     } catch (error) {
       console.error('Error fetching files:', error);
       setError('Failed to load files');
+      setUserFiles([]); // Ensure it's always an array even on error
     } finally {
       setLoading(false);
     }
@@ -101,20 +124,34 @@ const FileUploadManagement = ({
       return;
     }
 
-    // Add new files with preview
-    const newFiles = fileArray.map(file => ({
-      id: Date.now() + Math.random(),
-      file: file,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
-    }));
+    // Process each file and convert to data URL
+    fileArray.forEach(file => {
+      console.log('Processing file:', file.name, file.size, file.type);
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        const newFile = {
+          id: Date.now() + Math.random(),
+          file: file,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          preview: file.type.startsWith('image/') ? reader.result : null,
+          dataUrl: reader.result // Store the data URL for upload
+        };
 
-    setSelectedFiles(prev => ({
-      ...prev,
-      [categoryId]: [...currentFiles, ...newFiles]
-    }));
+        console.log('New file object created:', newFile);
+
+        setSelectedFiles(prev => {
+          const updated = {
+            ...prev,
+            [categoryId]: [...(prev[categoryId] || []), newFile]
+          };
+          console.log('Updated selectedFiles state:', updated);
+          return updated;
+        });
+      };
+    });
   };
 
   const removeSelectedFile = (categoryId, fileId) => {
@@ -126,22 +163,35 @@ const FileUploadManagement = ({
 
   const uploadFilesByCategory = async (categoryId) => {
     const files = selectedFiles[categoryId] || [];
-    if (files.length === 0) return;
+    console.log('Upload function called for category:', categoryId);
+    console.log('Files in category:', files);
+    
+    if (files.length === 0) {
+      console.log('No files to upload for category:', categoryId);
+      return;
+    }
 
     try {
       setUploading(true);
       setError('');
 
-      const formData = new FormData();
-      files.forEach(fileObj => {
-        formData.append('files', fileObj.file);
-      });
-      formData.append('employeeId', employeeDetails._id);
-      formData.append('category', categoryId);
+      // Prepare JSON payload
+      const payload = {
+        employeeId: employeeDetails._id,
+        category: categoryId,
+        files: files.map(fileObj => ({
+          originalName: fileObj.name,
+          fileType: fileObj.type,
+          fileSize: fileObj.size,
+          dataUrl: fileObj.dataUrl
+        }))
+      };
+
+      console.log('Upload payload:', payload);
 
       setUploadProgress(prev => ({ ...prev, [categoryId]: 0 }));
 
-      const response = await apiService.uploadFile(formData);
+      const response = await apiService.uploadFile(payload);
       
       if (response.data && response.data.length > 0) {
         setUserFiles(prev => [...response.data, ...prev]);
@@ -161,11 +211,23 @@ const FileUploadManagement = ({
   };
 
   const uploadAllFiles = async () => {
+    console.log('=== UPLOAD ALL FILES STARTED ===');
+    console.log('Current selectedFiles state:', selectedFiles);
+    
     const categoriesToUpload = Object.keys(selectedFiles).filter(
       categoryId => selectedFiles[categoryId].length > 0
     );
-
+    
+    console.log('Categories to upload:', categoriesToUpload);
+    
+    if (categoriesToUpload.length === 0) {
+      console.log('No categories have files to upload');
+      setError('No files selected for upload');
+      return;
+    }
+    
     for (const categoryId of categoriesToUpload) {
+      console.log(`Uploading files for category: ${categoryId}`);
       await uploadFilesByCategory(categoryId);
     }
   };
@@ -181,20 +243,49 @@ const FileUploadManagement = ({
 //   };
 
   const handleFilePreview = (file) => {
-    setPreviewDialog({ open: true, file });
+    // Handle both selected files and uploaded files
+    const previewFile = {
+      originalName: file.fileName || file.name || file.originalName,
+      fileType: getFileTypeFromUrl(file.fileUrl || file.preview || file.dataUrl),
+      fileUrl: file.fileUrl || file.preview || file.dataUrl
+    };
+    setPreviewDialog({ open: true, file: previewFile });
   };
 
-  const handleFileDownload = async (file) => {
+  // Helper function to determine file type from URL
+  const getFileTypeFromUrl = (url) => {
+    if (!url) return null;
+    
+    const extension = url.split('.').pop().toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'webp':
+        return 'image/' + extension;
+      case 'pdf':
+        return 'application/pdf';
+      default:
+        return 'application/octet-stream';
+    }
+  };
+
+  const handleFileDownload = (file) => {
     try {
-      const response = await apiService.downloadUserFile(file._id);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Direct download from fileUrl (since there's no download API)
+      if (!file.fileUrl) {
+        setError('File URL not available');
+        return;
+      }
+
       const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', file.originalName);
+      link.href = file.fileUrl;
+      link.setAttribute('download', file.fileName || file.originalName);
+      link.setAttribute('target', '_blank');
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading file:', error);
       setError('Failed to download file');
@@ -222,7 +313,7 @@ const FileUploadManagement = ({
   };
 
   const getCategoryStatus = (categoryId) => {
-    const uploadedFiles = userFiles.filter(file => file.category === categoryId);
+    const uploadedFiles = (userFiles || []).filter(file => file.category === categoryId);
     const selectedFilesCount = selectedFiles[categoryId]?.length || 0;
     
     if (uploadedFiles.length > 0) {
@@ -293,7 +384,7 @@ const FileUploadManagement = ({
         {documentCategories.map((category) => {
           const status = getCategoryStatus(category.id);
           const selectedFilesCount = selectedFiles[category.id]?.length || 0;
-          const uploadedFiles = userFiles.filter(file => file.category === category.id);
+          const uploadedFiles = (userFiles || []).filter(file => file.category === category.id);
           
           return (
             <Paper key={category.id} variant="outlined" sx={{ p: 1.5 }}>
@@ -389,21 +480,44 @@ const FileUploadManagement = ({
                   <Stack spacing={0.5}>
                     {selectedFiles[category.id].slice(0, 3).map((fileObj) => (
                       <Box key={fileObj.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 0.5, bgcolor: 'grey.50', borderRadius: 0.5 }}>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="caption" noWrap sx={{ fontSize: '0.75rem' }}>
-                            {fileObj.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
-                            {formatFileSize(fileObj.size)}
-                          </Typography>
+                        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {/* File Icon */}
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {getFileIcon(fileObj.type)}
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="caption" noWrap sx={{ fontSize: '0.75rem' }}>
+                              {fileObj.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                              {formatFileSize(fileObj.size)}
+                            </Typography>
+                          </Box>
                         </Box>
-                        <IconButton
-                          size="small"
-                          onClick={() => removeSelectedFile(category.id, fileObj.id)}
-                          sx={{ p: 0.25 }}
-                        >
-                          <CancelIcon sx={{ fontSize: 16, color: 'error.main' }} />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 0.25 }}>
+                          {/* Preview Button for Images and PDFs */}
+                          {(fileObj.type.startsWith('image/') || fileObj.type === 'application/pdf') && (
+                            <Tooltip title="Preview">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleFilePreview(fileObj)}
+                                sx={{ p: 0.25 }}
+                              >
+                                <ViewIcon sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {/* Remove Button */}
+                          <Tooltip title="Remove">
+                            <IconButton
+                              size="small"
+                              onClick={() => removeSelectedFile(category.id, fileObj.id)}
+                              sx={{ p: 0.25 }}
+                            >
+                              <CancelIcon sx={{ fontSize: 16, color: 'error.main' }} />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
                       </Box>
                     ))}
                     {selectedFilesCount > 3 && (
@@ -437,10 +551,7 @@ const FileUploadManagement = ({
                       <Box key={file._id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 0.5, bgcolor: 'success.light', bgcolor: 'rgba(76, 175, 80, 0.1)', borderRadius: 0.5 }}>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="caption" noWrap sx={{ fontSize: '0.75rem' }}>
-                            {file.originalName}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
-                            {formatFileSize(file.fileSize)}
+                            {file.fileName || file.originalName}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', gap: 0.25 }}>
@@ -448,7 +559,6 @@ const FileUploadManagement = ({
                             <IconButton
                               size="small"
                               onClick={() => handleFilePreview(file)}
-                              disabled={!file.fileType.startsWith('image/') && file.fileType !== 'application/pdf'}
                               sx={{ p: 0.25 }}
                             >
                               <ViewIcon sx={{ fontSize: 14 }} />
@@ -475,21 +585,42 @@ const FileUploadManagement = ({
         })}
       </Stack>
 
-      {/* Compact Bulk Upload Button */}
-      {getTotalSelectedFiles() > 0 && (
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<UploadIcon />}
-            onClick={uploadAllFiles}
-            disabled={uploading}
-            sx={{ px: 2, py: 0.75, fontSize: '0.875rem' }}
-          >
-            Upload All ({getTotalSelectedFiles()})
-          </Button>
-        </Box>
-      )}
+      {/* Single Submit Button */}
+      {/* <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<UploadIcon />}
+          onClick={uploadAllFiles}
+          disabled={uploading || getTotalSelectedFiles() === 0}
+          sx={{ 
+            px: 4, 
+            py: 1.5, 
+            fontSize: '1rem',
+            fontWeight: 600,
+            minWidth: 200,
+            borderRadius: 2,
+            boxShadow: 2,
+            '&:hover': {
+              boxShadow: 4,
+            }
+          }}
+        >
+          {uploading ? (
+            <>
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+              Uploading...
+            </>
+          ) : (
+            `Submit Documents (${getTotalSelectedFiles()})`
+          )}
+        </Button>
+        {getTotalSelectedFiles() === 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Select files above to enable submit
+          </Typography>
+        )}
+      </Box> */}
 
 
       {/* File Preview Dialog */}
@@ -510,11 +641,15 @@ const FileUploadManagement = ({
         <DialogContent>
           {previewDialog.file && (
             <Box sx={{ textAlign: 'center' }}>
-              {previewDialog.file.fileType.startsWith('image/') ? (
+              {previewDialog.file.fileType && previewDialog.file.fileType.startsWith('image/') ? (
                 <img
                   src={previewDialog.file.fileUrl}
                   alt={previewDialog.file.originalName}
                   style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
                 />
               ) : previewDialog.file.fileType === 'application/pdf' ? (
                 <iframe
@@ -525,9 +660,17 @@ const FileUploadManagement = ({
                   title={previewDialog.file.originalName}
                 />
               ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Preview not available for this file type
-                </Typography>
+                <Box>
+                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+                    File Preview
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                    {previewDialog.file.originalName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Preview not available for this file type. Click Download to view the file.
+                  </Typography>
+                </Box>
               )}
             </Box>
           )}
