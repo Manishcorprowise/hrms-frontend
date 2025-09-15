@@ -257,7 +257,7 @@ const FileUpload = ({
           </Typography>
           <Grid container spacing={2}>
             {existingFiles.map((file) => (
-              <Grid item xs={12} sm={6} md={4} key={file._id}>
+              <Grid item size={{ xs: 12, sm: 6, md: 4 }} key={file._id}>
                 <Card>
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

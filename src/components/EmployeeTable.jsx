@@ -244,6 +244,16 @@ const EmployeeTable = ({ employees, onEdit, onDelete, onView, loading = false, o
               </TableCell>
               <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                 <TableSortLabel
+                  active={orderBy === 'manager'}
+                  direction={orderBy === 'manager' ? order : 'asc'}
+                  onClick={() => handleSort('manager')}
+                  sx={{ color: 'white', '&:hover': { color: 'white' } }}
+                >
+                  Manager
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
+                <TableSortLabel
                   active={orderBy === 'role'}
                   direction={orderBy === 'role' ? order : 'asc'}
                   onClick={() => handleSort('role')}
@@ -325,6 +335,14 @@ const EmployeeTable = ({ employees, onEdit, onDelete, onView, loading = false, o
                     <WorkIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
                     <Typography variant="body2">
                       {employee.position}
+                    </Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <WorkIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="body2">
+                      {employee.manager?.employeeName || employee.manager || 'N/A'}
                     </Typography>
                   </Box>
                 </TableCell>

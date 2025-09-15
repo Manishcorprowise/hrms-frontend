@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import { apiService } from '../../apiservice/api';
 import {
   Box,
   Card,
@@ -44,7 +43,7 @@ import {
   AccountBalance as AccountBalanceIcon
 } from '@mui/icons-material';
 import { useThemeContext } from '../../theme/ThemeProvider';
-import FileUpload from '../../components/FileUpload';
+import FileUploadManagement from '../../components/FileUploadManagement';
 import { useSelector } from 'react-redux';
 
 const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null }) => {
@@ -56,37 +55,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
     account: false
   });
   
-  // File management state
-  const [userFiles, setUserFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const { user } = useSelector(state => state.auth);
-  // File management functions
-  const fetchUserFiles = async (userId) => {
-    try {
-      setLoading(true);
-      const response = await apiService.getUserFiles(userId);
-      setUserFiles(response.data || []);
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      setError('Failed to load files');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileUploadSuccess = (newFile) => {
-    setUserFiles(prev => [newFile, ...prev]);
-  };
-
-  const handleFileDelete = (fileId) => {
-    setUserFiles(prev => prev.filter(file => file._id !== fileId));
-  };
-
-  const handleFilePreview = (file) => {
-    // Handle file preview
-  };
-
   const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
     defaultValues: {
       // Employment Details
@@ -129,13 +98,6 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
     name: 'education'
   });
 
-  // Load files when component mounts
-  useEffect(() => {
-    const userId = targetUserId || user?.id;
-    if (userId) {
-      fetchUserFiles(userId);
-    }
-  }, [user?.id, targetUserId]);
 
 
   const handleSectionToggle = (section) => {
@@ -195,7 +157,7 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
         beneficiaryName: data.beneficiaryName
       }
     };
-    
+    console.log(formattedData,"formattedData");
     onSave(formattedData);
   };
 
@@ -312,6 +274,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     label="Employee Name"
                     error={!!errors.employeeName}
                     helperText={errors.employeeName?.message}
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -328,6 +297,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     label="Employee ID"
                     error={!!errors.employeeId}
                     helperText={errors.employeeId?.message}
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -351,6 +327,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     type="email"
                     error={!!errors.email}
                     helperText={errors.email?.message}
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -364,6 +347,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     {...field}
                     fullWidth
                     label="Phone Number"
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -379,6 +369,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     label="Joining Date"
                     type="date"
                     InputLabelProps={{ shrink: true }}
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -392,6 +389,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     {...field}
                     fullWidth
                     label="Position/Job Title"
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -405,6 +409,13 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     {...field}
                     fullWidth
                     label="Manager"
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                        cursor: 'default'
+                      }
+                    }}
                   />
                 )}
               />
@@ -768,7 +779,6 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                 name="bankAccountNumber"
                 control={control}
                 rules={{ 
-                  required: 'Bank Account Number is required',
                   pattern: {
                     value: /^[0-9]{9,18}$/,
                     message: 'Please enter a valid account number (9-18 digits)'
@@ -791,7 +801,6 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                 name="bankIFSC"
                 control={control}
                 rules={{ 
-                  required: 'Bank IFSC is required',
                   pattern: {
                     value: /^[A-Z]{4}0[A-Z0-9]{6}$/,
                     message: 'Please enter a valid IFSC code (e.g., SBIN0001234)'
@@ -816,7 +825,6 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                 name="beneficiaryName"
                 control={control}
                 rules={{ 
-                  required: 'Beneficiary Name is required',
                   minLength: {
                     value: 2,
                     message: 'Beneficiary name must be at least 2 characters'
@@ -838,36 +846,18 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
         </FormCard>
 
         {/* Document Upload & Management */}
-        <FormCard
-          title="Document Upload & Management"
-          icon={<CloudUpload color="primary" />}
+        <FileUploadManagement
+          employeeDetails={{
+            _id: targetUserId || user?.id,
+            employeeName: initialData?.employment?.employeeName || user?.employeeName,
+            email: initialData?.employment?.email || user?.email
+          }}
           isExpanded={expandedSections.documents}
           onToggle={() => handleSectionToggle('documents')}
-        >
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-              {error}
-            </Alert>
-          )}
-
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <FileUpload
-              employeeId={targetUserId || user?.id}
-              onUploadSuccess={handleFileUploadSuccess}
-              onUploadError={(error) => setError(error.message)}
-              existingFiles={userFiles}
-              onFileDelete={handleFileDelete}
-              onFilePreview={handleFilePreview}
-              maxFiles={10}
-              allowedTypes={['image/*', 'application/pdf', '.doc', '.docx', '.xls', '.xlsx']}
-              category="personal"
-            />
-          )}
-        </FormCard>
+          category="personal"
+          maxFiles={10}
+          allowedTypes={['image/*', 'application/pdf', '.doc', '.docx', '.xls', '.xlsx']}
+        />
       </form>
     </Box>
   );

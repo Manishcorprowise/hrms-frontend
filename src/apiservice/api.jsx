@@ -174,7 +174,7 @@ export const apiService = {
   // Profile/File management APIs
   async getUserFiles(employeeId) {
     try {
-      const endpoint = `/profile/employee/${employeeId}`;
+      const endpoint = `/document/get-files?employeeId=${employeeId}`;
       return await this.hitApi("GET", endpoint);
     } catch (error) {
       console.error("Error fetching user files:", error.response?.data || error.message);
@@ -182,9 +182,9 @@ export const apiService = {
     }
   },
 
-  async uploadFile(employeeId, fileData) {
+  async uploadFile(fileData) {
     try {
-      const endpoint = `/profile/employee/${employeeId}/upload`;
+      const endpoint = `/document/upload`;
       return await this.hitApi("POST", endpoint, fileData, "multipart/form-data");
     } catch (error) {
       console.error("Error uploading file:", error.response?.data || error.message);
@@ -192,15 +192,15 @@ export const apiService = {
     }
   },
 
-  async deleteFile(fileId) {
-    try {
-      const endpoint = `/profile/file/${fileId}`;
-      return await this.hitApi("DELETE", endpoint);
-    } catch (error) {
-      console.error("Error deleting file:", error.response?.data || error.message);
-      throw error;
-    }
-  },
+  // async deleteFile(fileId) {
+  //   try {
+  //     const endpoint = `/document/file/${fileId}`;
+  //     return await this.hitApi("DELETE", endpoint);
+  //   } catch (error) {
+  //     console.error("Error deleting file:", error.response?.data || error.message);
+  //     throw error;
+  //   }
+  // },
 
   async getAllEmployees() {
     try {

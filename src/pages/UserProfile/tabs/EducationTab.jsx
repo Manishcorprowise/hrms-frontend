@@ -17,7 +17,7 @@ import {
 
 const EducationTab = ({ userData }) => {
   const InfoItem = ({ label, value, icon }) => (
-    <Grid item xs={12} sm={6} md={4} lg={3}>
+    <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
       <Box 
         sx={{ 
           mb: 2,

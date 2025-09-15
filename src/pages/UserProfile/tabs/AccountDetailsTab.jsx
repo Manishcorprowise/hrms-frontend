@@ -15,7 +15,7 @@ const AccountDetailsTab = ({ userData }) => {
   const accountData = Array.isArray(userData?.account) ? userData.account[0] : userData?.account;
   
   const InfoItem = ({ label, value, icon }) => (
-    <Grid item xs={12} sm={6} md={4} lg={3}>
+    <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
       <Box 
         sx={{ 
           mb: 2,

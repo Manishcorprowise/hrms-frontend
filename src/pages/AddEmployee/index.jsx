@@ -349,14 +349,17 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                       <InputLabel>Select Manager</InputLabel>
                       <Select
                         {...field}
+                        value={typeof field.value === 'object' ? field.value?._id || '' : field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value)}
                         label="Select Manager"
                         displayEmpty
                         renderValue={(selected) => {
                           if (!selected) {
                             return <em style={{ color: '#999' }}>Select a manager</em>;
                           }
+                          
                           const selectedEmployee = employees.find(emp => emp._id === selected);
-                          return selectedEmployee ? selectedEmployee.employeeName : selected;
+                          return selectedEmployee ? selectedEmployee.employeeName : 'Unknown';
                         }}
                       >
                         <MenuItem value="">

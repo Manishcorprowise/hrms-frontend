@@ -94,7 +94,7 @@ const UserProfile = () => {
         joiningDate: targetUserData?.dateOfJoining || '',
         position: targetUserData?.position || '',
         department: targetUserData?.department || '',
-        manager: targetUserData?.manager || ''
+        manager: typeof targetUserData?.manager === 'object' && targetUserData?.manager?.employeeName ? targetUserData.manager.employeeName : (targetUserData?.manager || '')
       };
 
       // Fetch personal details
@@ -153,7 +153,7 @@ const UserProfile = () => {
         joiningDate: user?.dateOfJoining || '',
         position: user?.position || '',
         department: user?.department || '',
-        manager: user?.manager || ''
+        manager: typeof user?.manager === 'object' && user?.manager?.employeeName ? user.manager.employeeName : (user?.manager || '')
       };
 
       // Fetch personal details
@@ -359,7 +359,7 @@ const UserProfile = () => {
                       fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' }
                     }}
                   >
-                    {userData.employment?.position || 'Position'}
+                    {(userData.employment?.position || 'Position').toUpperCase()}
                   </Typography>
                   <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                     <Chip 
@@ -425,7 +425,7 @@ const UserProfile = () => {
                 Employee Information
               </Typography>
               <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-                <Grid item xs={12} sm={6} md={4} lg={3}>
+                <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   <Box sx={{ 
                     p: { xs: 1.5, sm: 2 }, 
                     border: '1px solid',
@@ -476,7 +476,7 @@ const UserProfile = () => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={3}>
+                <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   <Box sx={{ 
                     p: { xs: 1.5, sm: 2 }, 
                     border: '1px solid',
@@ -527,7 +527,7 @@ const UserProfile = () => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={3}>
+                <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   <Box sx={{ 
                     p: { xs: 1.5, sm: 2 }, 
                     border: '1px solid',
@@ -578,7 +578,7 @@ const UserProfile = () => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={3}>
+                <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   <Box sx={{ 
                     p: { xs: 1.5, sm: 2 }, 
                     border: '1px solid',
@@ -629,7 +629,7 @@ const UserProfile = () => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6} md={4} lg={3}>
+                <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   <Box sx={{ 
                     p: { xs: 1.5, sm: 2 }, 
                     border: '1px solid',
