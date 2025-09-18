@@ -363,12 +363,12 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
               </Grid>
 
               {/* Manager Selection */}
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} sx={{ minWidth: 160 }}>
                 <Controller
                   name="managerId"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.managerId}>
+                    <FormControl fullWidth error={!!errors.managerId} variant="outlined">
                       <InputLabel>Select Manager</InputLabel>
                       <Select
                         {...field}
@@ -376,10 +376,21 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                         onChange={(e) => field.onChange(e.target.value)}
                         label="Select Manager"
                         displayEmpty
+                        variant="outlined"
+                        sx={{
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgba(0, 0, 0, 0.87)',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgb(33, 44, 101)',
+                            borderWidth: 2,
+                          },
+                        }}
                         renderValue={(selected) => {
-                          if (!selected) {
-                            return <em style={{ color: '#999' }}>Select a manager</em>;
-                          }
+
                           
                           // First try to find by ID
                           const selectedEmployee = employees.find(emp => emp._id === selected);

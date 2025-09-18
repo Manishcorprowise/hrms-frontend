@@ -31,12 +31,12 @@ import {
   
     // Define menu items with role requirements
     const allMenuItems = [
-      { 
-        text: "Dashboard", 
-        icon: <DashboardIcon />, 
-        path: "/dashboard",
-        roles: ['admin', 'super_admin', 'employee'] 
-      },
+      // { 
+      //   text: "Dashboard", 
+      //   icon: <DashboardIcon />, 
+      //   path: "/dashboard",
+      //   roles: ['admin', 'super_admin', 'employee'] 
+      // },
       { 
         text: "My Profile", 
         icon: <PersonIcon />, 
@@ -49,24 +49,24 @@ import {
         path: "/employees",
         roles: ['admin', 'super_admin'] 
       },
-      { 
-        text: "Projects", 
-        icon: <WorkIcon />, 
-        path: "/projects",
-        roles: ['admin', 'super_admin']
-      },
-      { 
-        text: "Settings", 
-        icon: <SettingsIcon />, 
-        path: "/settings",
-        roles: ['admin', 'super_admin', 'employee']
-      },
-      { 
-        text: "Admin Panel", 
-        icon: <AdminPanelSettingsIcon />, 
-        path: "/admin",
-        roles: ['super_admin'] 
-      },
+      // { 
+      //   text: "Projects", 
+      //   icon: <WorkIcon />, 
+      //   path: "/projects",
+      //   roles: ['admin', 'super_admin']
+      // },
+      // { 
+      //   text: "Settings", 
+      //   icon: <SettingsIcon />, 
+      //   path: "/settings",
+      //   roles: ['admin', 'super_admin', 'employee']
+      // },
+      // { 
+      //   text: "Admin Panel", 
+      //   icon: <AdminPanelSettingsIcon />, 
+      //   path: "/admin",
+      //   roles: ['super_admin'] 
+      // },
     ];
 
     // Filter menu items based on user role
@@ -123,13 +123,13 @@ import {
                     color: "text.primary",
                     transition: "all 0.2s ease-in-out",
                     "&.Mui-selected": {
-                      bgcolor: "primary.main",
-                      color: "primary.contrastText",
+                      bgcolor: "rgb(33, 44, 101)",
+                      color: "white",
                       "& .MuiListItemIcon-root": {
-                        color: "primary.contrastText",
+                        color: "white",
                       },
                       "&:hover": {
-                        bgcolor: "primary.dark",
+                        bgcolor: "rgb(43, 54, 111)",
                       },
                     },
                     "&:hover": {
@@ -137,7 +137,7 @@ import {
                         ? "action.hover" 
                         : "action.selected",
                       "& .MuiListItemIcon-root": {
-                        color: "primary.main",
+                        color: "rgb(33, 44, 101)",
                       },
                     },
                   }}

@@ -21,11 +21,12 @@ import {
   VisibilityOff,
   Email,
   Lock,
-  Business,
   Login as LoginIcon,
+  Business,
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { loginUser, clearError } from '../store/authSlice';
+import KADLogo from '../assets/KAD_Logo.png';
 
 export default function Login() {
   const theme = useTheme();
@@ -33,9 +34,9 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  
+
   const { isAuthenticated, isLoading, error } = useSelector(state => state.auth);
-  
+
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -52,7 +53,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from?.pathname || '/dashboard';
+      const from = location.state?.from?.pathname || '/profile';
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
@@ -65,7 +66,7 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const result = await dispatch(loginUser(data)).unwrap();
-      
+
       if (result.success) {
         // Check if user has temporary password
         if (result.user && result.user.isTemPassword) {
@@ -73,7 +74,7 @@ export default function Login() {
           navigate('/change-password', { replace: true });
         } else {
           // Normal redirect to intended page or dashboard
-          const from = location.state?.from?.pathname || '/dashboard';
+          const from = location.state?.from?.pathname || '/profile';
           navigate(from, { replace: true });
         }
       }
@@ -92,7 +93,7 @@ export default function Login() {
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, rgb(33, 44, 101) 0%, rgb(25, 35, 85) 100%)',
       }}
     >
       <Container maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', py: 4 }}>
@@ -111,7 +112,7 @@ export default function Login() {
           <Box
             sx={{
               flex: 1,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, rgb(33, 44, 101) 0%, rgb(25, 35, 85) 100%)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -132,16 +133,30 @@ export default function Login() {
             }}
           >
             <Box sx={{ textAlign: 'center', zIndex: 1 }}>
-              <Business sx={{ fontSize: 80, mb: 2, opacity: 0.9 }} />
+              <Box
+                component="img"
+                src={KADLogo}
+                alt="Company Logo"
+                sx={{
+                  height: 50,
+                  width: 'auto',
+                  mb: 2,
+                  opacity: 0.9,
+                  maxWidth: '100%',
+                  backgroundColor: 'white',
+                  padding: 1,
+                  borderRadius: 1,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                }}
+              />
+              {/* <Box><Business sx={{ fontSize: 80, mb: 2, opacity: 0.9 }} /></Box> */}
               <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
                 HRMS
               </Typography>
               <Typography variant="h6" sx={{ opacity: 0.9, mb: 4 }}>
                 Human Resource Management System
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.8, maxWidth: 300 }}>
-                Streamline your workforce management with our comprehensive HR solution
-              </Typography>
+
             </Box>
           </Box>
 
@@ -158,7 +173,7 @@ export default function Login() {
           >
             <Box sx={{ maxWidth: 400, mx: 'auto', width: '100%' }}>
               <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
-                Welcome Back
+                Welcome
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
                 Sign in to your account to continue
@@ -253,33 +268,16 @@ export default function Login() {
                   sx={{
                     py: 1.5,
                     mb: 3,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, rgb(33, 44, 101) 0%, rgb(25, 35, 85) 100%)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                      background: 'linear-gradient(135deg, rgb(43, 54, 111) 0%, rgb(35, 45, 95) 100%)',
                     },
                   }}
                 >
                   {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
 
-                <Divider sx={{ my: 3 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    OR
-                  </Typography>
-                </Divider>
 
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Don't have an account?{' '}
-                    <Button
-                      variant="text"
-                      color="primary"
-                      sx={{ textTransform: 'none', fontWeight: 'bold' }}
-                    >
-                      Contact Administrator
-                    </Button>
-                  </Typography>
-                </Box>
               </Box>
             </Box>
           </Box>

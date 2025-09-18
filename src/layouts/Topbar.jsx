@@ -129,9 +129,9 @@ import {
             <IconButton 
               onClick={onToggle} 
               sx={{ 
-                color: "text.primary",
+                color: "rgb(33, 44, 101)",
                 '&:hover': {
-                  backgroundColor: 'action.hover',
+                  backgroundColor: 'rgba(33, 44, 101, 0.1)',
                 },
                 transition: 'background-color 0.2s ease-in-out',
               }}
@@ -145,12 +145,12 @@ import {
           <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 2 } }}>
             {/* Theme Toggle */}
             <IconButton 
-              color="primary" 
               onClick={toggleTheme} 
               size="small"
               sx={{
+                color: 'rgb(33, 44, 101)',
                 '&:hover': {
-                  backgroundColor: 'action.hover',
+                  backgroundColor: 'rgba(33, 44, 101, 0.1)',
                 },
                 transition: 'background-color 0.2s ease-in-out',
               }}
@@ -160,11 +160,11 @@ import {
 
             {/* Notifications */}
             <IconButton 
-              color="primary" 
               size="small"
               sx={{
+                color: 'rgb(33, 44, 101)',
                 '&:hover': {
-                  backgroundColor: 'action.hover',
+                  backgroundColor: 'rgba(33, 44, 101, 0.1)',
                 },
                 transition: 'background-color 0.2s ease-in-out',
               }}
@@ -193,8 +193,8 @@ import {
                   height: { xs: 32, sm: 40 },
                   border: '2px solid',
                   borderColor: 'divider',
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText'
+                  bgcolor: 'rgb(33, 44, 101)',
+                  color: 'white'
                 }}
               >
                 {user?.employeeName?.charAt(0) || "U"}
