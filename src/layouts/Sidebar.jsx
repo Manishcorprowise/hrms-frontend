@@ -41,13 +41,13 @@ import {
         text: "My Profile", 
         icon: <PersonIcon />, 
         path: "/profile",
-        roles: ['admin', 'super_admin', 'employee']
+        roles: ['admin', 'super_admin', 'employee','manager']
       },
       { 
         text: "Employees", 
         icon: <PeopleIcon />, 
         path: "/employees",
-        roles: ['admin', 'super_admin'] 
+        roles: ['admin', 'super_admin','manager'] 
       },
       // { 
       //   text: "Projects", 

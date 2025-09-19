@@ -112,7 +112,7 @@ export const apiService = {
   async updateUserPassword(passwordData) {
     try {
       const endpoint = "/employee/update-password";
-      return await this.hitApi("PUT", endpoint, passwordData, "application/json", false);
+      return await this.hitApi("POST", endpoint, passwordData, "application/json", false);
     } catch (error) {
       console.error("Password update failed:", error);
       throw error;
@@ -132,8 +132,8 @@ export const apiService = {
 
   async updatePersonalDetails(employeeId, data) {
     try {
-      const endpoint = `/personal-details/${employeeId}`;
-      return await this.hitApi("PUT", endpoint, data);
+      const endpoint = `/personal-details/update/${employeeId}`;
+      return await this.hitApi("POST", endpoint, data);
     } catch (error) {
       console.error("Error updating personal details:", error.response?.data || error.message);
       throw error;
@@ -164,7 +164,7 @@ export const apiService = {
   async updateEmployee(employeeId, payload) {
     try {
       const endpoint = `/employee/update-user/${employeeId}`;
-      return await this.hitApi("PATCH", endpoint, payload);
+      return await this.hitApi("POST", endpoint, payload);
     } catch (error) {
       console.error("Error updating employee:", error.response?.data || error.message);
       throw error;

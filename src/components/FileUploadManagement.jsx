@@ -187,7 +187,6 @@ const FileUploadManagement = ({
         }))
       };
 
-      console.log('Upload payload:', payload);
 
       setUploadProgress(prev => ({ ...prev, [categoryId]: 0 }));
 
@@ -195,6 +194,7 @@ const FileUploadManagement = ({
       
       if (response.data && response.data.length > 0) {
         setUserFiles(prev => [...response.data, ...prev]);
+        fetchUserFiles(employeeDetails._id);
         // Clear selected files after successful upload
         setSelectedFiles(prev => ({
           ...prev,

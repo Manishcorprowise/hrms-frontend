@@ -159,7 +159,7 @@ import {
             </IconButton>
 
             {/* Notifications */}
-            <IconButton 
+            {/* <IconButton 
               size="small"
               sx={{
                 color: 'rgb(33, 44, 101)',
@@ -172,7 +172,7 @@ import {
               <Badge badgeContent={2} color="error">
                 <NotificationsIcon />
               </Badge>
-            </IconButton>
+            </IconButton> */}
 
             {/* User Avatar */}
             <IconButton 

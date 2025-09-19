@@ -4,14 +4,16 @@
 export const ROLES = {
   SUPER_ADMIN: 'super_admin',
   ADMIN: 'admin',
-  EMPLOYEE: 'employee'
+  EMPLOYEE: 'employee',
+  MANAGER: 'manager'
 };
 
 // Role hierarchy (higher number = more permissions)
 export const ROLE_HIERARCHY = {
   [ROLES.EMPLOYEE]: 1,
-  [ROLES.ADMIN]: 2,
-  [ROLES.SUPER_ADMIN]: 3
+  [ROLES.MANAGER]: 2,
+  [ROLES.ADMIN]: 3,
+  [ROLES.SUPER_ADMIN]: 4
 };
 
 // Check if user has required role

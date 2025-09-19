@@ -627,7 +627,7 @@ export default function Employee() {
         </Card>
       </Box>
 
-      <Fab
+      {/* <Fab
         color="primary"
         aria-label="chat"
         sx={{
@@ -651,7 +651,7 @@ export default function Employee() {
         onClick={() => console.log('Open chat')}
       >
         <Chat />
-      </Fab>
+      </Fab> */}
 
   
       <AddEmployee
