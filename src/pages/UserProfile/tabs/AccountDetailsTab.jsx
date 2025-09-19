@@ -7,7 +7,11 @@ import {
 import {
   AccountBalance as BankIcon,
   CreditCard as CardIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  Business as BusinessIcon,
+  LocationOn as LocationIcon,
+  Numbers as NumbersIcon,
+  AccountBalanceWallet as WalletIcon
 } from '@mui/icons-material';
 
 const AccountDetailsTab = ({ userData }) => {
@@ -93,7 +97,12 @@ const AccountDetailsTab = ({ userData }) => {
 
   return (
     <Box>
+      <Typography variant="h6" sx={{ mb: 3, color: 'primary.main', fontWeight: 600 }}>
+        Banking Information
+      </Typography>
+      
       <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ alignItems: 'stretch' }}>
+        {/* Standard Banking Fields */}
         <InfoItem 
           label="Bank Account Number" 
           value={accountData?.bankAccountNumber || 'Not provided'}
@@ -108,6 +117,28 @@ const AccountDetailsTab = ({ userData }) => {
           label="Beneficiary Name" 
           value={accountData?.beneficiaryName || 'Not provided'}
           icon={<PersonIcon />}
+        />
+        
+        {/* Canadian Banking Fields */}
+        <InfoItem 
+          label="Bank Name" 
+          value={accountData?.bankName || 'Not provided'}
+          icon={<BusinessIcon />}
+        />
+        <InfoItem 
+          label="Transit Number" 
+          value={accountData?.transitNumber || 'Not provided'}
+          icon={<NumbersIcon />}
+        />
+        <InfoItem 
+          label="Institution Code" 
+          value={accountData?.institutionCode || 'Not provided'}
+          icon={<WalletIcon />}
+        />
+        <InfoItem 
+          label="Bank Address" 
+          value={accountData?.bankAddress || 'Not provided'}
+          icon={<LocationIcon />}
         />
       </Grid>
     </Box>

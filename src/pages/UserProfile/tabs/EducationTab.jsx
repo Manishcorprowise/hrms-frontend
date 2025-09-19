@@ -97,7 +97,8 @@ const EducationTab = ({ userData }) => {
     <Box>
       {(userData.education || []).filter(edu => edu.qualification && edu.qualification !== '').map((edu, index) => (
         <Accordion 
-          key={index} 
+          key={index}
+          defaultExpanded
           sx={{ 
             mb: 2,
             border: '1px solid',

@@ -89,6 +89,11 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
       bankAccountNumber: initialData?.account?.bankAccountNumber || '',
       bankIFSC: initialData?.account?.bankIFSC || '',
       beneficiaryName: initialData?.account?.beneficiaryName || '',
+      // Canadian Banking Fields
+      bankName: initialData?.account?.bankName || '',
+      bankAddress: initialData?.account?.bankAddress || '',
+      transitNumber: initialData?.account?.transitNumber || '',
+      institutionCode: initialData?.account?.institutionCode || '',
 
     }
   });
@@ -154,7 +159,12 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
       account: {
         bankAccountNumber: data.bankAccountNumber,
         bankIFSC: data.bankIFSC,
-        beneficiaryName: data.beneficiaryName
+        beneficiaryName: data.beneficiaryName,
+        // Canadian Banking Fields
+        bankName: data.bankName,
+        bankAddress: data.bankAddress,
+        transitNumber: data.transitNumber,
+        institutionCode: data.institutionCode,
       }
     };
     console.log(formattedData,"formattedData");
@@ -838,6 +848,93 @@ const UserProfileEdit = ({ onSave, onCancel, initialData, targetUserId = null })
                     placeholder="Enter the account holder's name"
                     error={!!errors.beneficiaryName}
                     helperText={errors.beneficiaryName?.message}
+                  />
+                )}
+              />
+            </Grid>
+            
+            {/* Canadian Banking Fields */}
+
+            
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="bankName"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Bank Name"
+                    placeholder="e.g., Scotia Bank"
+                    error={!!errors.bankName}
+                    helperText={errors.bankName?.message}
+                  />
+                )}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="transitNumber"
+                control={control}
+                rules={{ 
+                  pattern: {
+                    value: /^[0-9]{5}$/,
+                    message: 'Transit number must be 5 digits'
+                  }
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Transit Number"
+                    placeholder="e.g., 20477"
+                    error={!!errors.transitNumber}
+                    helperText={errors.transitNumber?.message}
+                  />
+                )}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="institutionCode"
+                control={control}
+                rules={{ 
+                  pattern: {
+                    value: /^[0-9]{3}$/,
+                    message: 'Institution code must be 3 digits'
+                  }
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Institution Code"
+                    placeholder="e.g., 002"
+                    error={!!errors.institutionCode}
+                    helperText={errors.institutionCode?.message}
+                  />
+                )}
+              />
+            </Grid>
+            
+            
+            
+            <Grid item xs={12}>
+              <Controller
+                name="bankAddress"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Bank Address"
+                    placeholder="e.g., 123, 3rd St SW Calgary, Alberta T2C3V9 Canada"
+                    multiline
+                    rows={2}
+                    error={!!errors.bankAddress}
+                    helperText={errors.bankAddress?.message}
                   />
                 )}
               />
