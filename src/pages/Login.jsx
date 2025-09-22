@@ -96,7 +96,7 @@ export default function Login() {
         background: 'linear-gradient(135deg, rgb(33, 44, 101) 0%, rgb(25, 35, 85) 100%)',
       }}
     >
-      <Container maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', py: 4 }}>
+      <Container maxWidth="lg"  sx={{ display: 'flex', alignItems: 'center', py: 4,  }}>
         <Paper
           elevation={24}
           sx={{
@@ -104,7 +104,8 @@ export default function Login() {
             width: '100%',
             minHeight: isMobile ? 'auto' : '600px',
             borderRadius: 3,
-            overflow: 'hidden',
+            // border: '2px solid rgb(33, 44, 101)',
+            // Remove overflow: 'hidden'
             flexDirection: isMobile ? 'column' : 'row',
           }}
         >
@@ -169,6 +170,7 @@ export default function Login() {
               flexDirection: 'column',
               justifyContent: 'center',
               backgroundColor: 'white',
+              borderRadius: 3,
             }}
           >
             <Box sx={{ maxWidth: 400, mx: 'auto', width: '100%' }}>

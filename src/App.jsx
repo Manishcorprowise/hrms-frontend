@@ -26,7 +26,7 @@ export default function App() {
                   <Employee />
                 </ProtectedRoute>
               } />
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<UserProfile />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/profile/:userId" element={<UserProfile />} />
               <Route path="/profile/edit" element={<UserProfileEdit />} />

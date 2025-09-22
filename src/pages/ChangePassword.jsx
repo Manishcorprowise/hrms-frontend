@@ -51,7 +51,7 @@ const ChangePassword = () => {
     if (!isAuthenticated) {
       navigate('/login');
     } else if (user && !user.isTemPassword) {
-      navigate('/dashboard');
+      navigate('/profile');
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -123,7 +123,7 @@ const ChangePassword = () => {
       if (result.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/profile');
         }, 900);
       }
     } catch (error) {
