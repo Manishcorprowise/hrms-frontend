@@ -185,10 +185,19 @@ const FileUpload = ({
   };
 
   const handleDownload = (file) => {
-    const link = document.createElement('a');
-    link.href = `/api/profile/download/${file._id}`;
-    link.download = file.originalName;
-    link.click();
+    try {
+      const link = document.createElement('a');
+      link.href = `/api/profile/download/${file._id}`;
+      link.setAttribute('download', file.originalName);
+      link.style.display = 'none';
+      link.setAttribute('rel', 'noopener noreferrer');
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
   };
 
   const getFileIcon = (mimeType) => {
@@ -391,17 +400,20 @@ const FileUpload = ({
                 {previewDialog.file.originalName}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Size: {formatFileSize(previewDialog.file.fileSize)} | 
-                Type: {previewDialog.file.mimeType}
+                Size: {formatFileSize(previewDialog.file.fileSize || previewDialog.file.size)} | 
+                Type: {previewDialog.file.mimeType || previewDialog.file.type}
               </Typography>
-              {previewDialog.file.mimeType.startsWith('image/') ? (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <img
-                    src={`/api/files/${previewDialog.file.filePath}`}
-                    alt={previewDialog.file.originalName}
-                    style={{ maxWidth: '100%', maxHeight: '500px' }}
-                  />
-                </Box>
+              {(previewDialog.file.mimeType || previewDialog.file.type)?.startsWith('image/') ? (
+                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <img
+                      src={previewDialog.file.filePath 
+                        ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${previewDialog.file.filePath}`
+                        : URL.createObjectURL(previewDialog.file)
+                      }
+                      alt={previewDialog.file.originalName}
+                      style={{ maxWidth: '100%', maxHeight: '500px' }}
+                    />
+                  </Box>
               ) : (
                 <Box sx={{ mt: 2, textAlign: 'center' }}>
                   <Typography variant="body1">

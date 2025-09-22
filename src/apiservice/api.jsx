@@ -28,6 +28,8 @@ export const apiService = {
         data: body,
         headers: {
           "Content-Type": contentType ? contentType : "application/json",
+          "X-File-Base-Url": apiUrl.apiEndPoint.replace('/api', '/api/files'),
+          "X-Frontend-Base-Url": apiUrl.frontendBaseUrl,
           ...(authHeader && { Authorization: authHeader }),
         },
       };

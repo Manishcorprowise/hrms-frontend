@@ -50,9 +50,10 @@ const ChangePassword = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else if (user && !user.isTemPassword) {
-      navigate('/profile');
-    }
+    } 
+    // else if (user && !user.isTemPassword) {
+    //   navigate('/profile');
+    // }
   }, [isAuthenticated, user, navigate]);
 
 
@@ -153,7 +154,7 @@ const ChangePassword = () => {
   }
 
   // Don't render if user is not authenticated or doesn't have temporary password
-  if (!isAuthenticated || !user || !user.isTemPassword) {
+  if (!isAuthenticated || !user ) {
     return null;
   }
 

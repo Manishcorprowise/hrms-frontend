@@ -42,6 +42,7 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import { apiService } from '../apiservice/api';
+import { apiUrl } from '../apiservice/apiConfig';
 
 const FileUploadManagement = ({ 
   employeeDetails, 
@@ -244,11 +245,16 @@ const FileUploadManagement = ({
 
   const handleFilePreview = (file) => {
     // Handle both selected files and uploaded files
+    console.log('File:', file);
     const previewFile = {
       originalName: file.fileName || file.name || file.originalName,
-      fileType: getFileTypeFromUrl(file.fileUrl || file.preview || file.dataUrl),
-      fileUrl: file.fileUrl || file.preview || file.dataUrl
+      fileType: file.type || getFileTypeFromUrl(file.fileUrl || file.preview || file.dataUrl),
+      filePath: file.fileUrl, // Store original file path
+      fileUrl: file.fileUrl
+        ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${file.fileUrl.replace(/^\/+/, '')}`
+        : file.preview || file.dataUrl
     };
+    console.log('Preview File:', previewFile);
     setPreviewDialog({ open: true, file: previewFile });
   };
 
@@ -273,8 +279,9 @@ const FileUploadManagement = ({
 
   const handleFileDownload = (file) => {
     try {
-      // Direct download from fileUrl (since there's no download API)
-      if (!file.fileUrl) {
+      // Use original file path from backend, not the constructed URL from preview
+      const filePath = file.filePath || file.fileUrl;
+      if (!filePath) {
         setError('File URL not available');
         return;
       }

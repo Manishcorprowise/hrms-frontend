@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import FileUploadManagement from '../../../components/FileUploadManagement';
 import { apiService } from '../../../apiservice/api';
+import { apiUrl } from '../../../apiservice/apiConfig';
 
 const DocumentsTab = ({ userFiles, filesLoading, onEdit, employeeDetails }) => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -82,21 +83,33 @@ const DocumentsTab = ({ userFiles, filesLoading, onEdit, employeeDetails }) => {
     const previewFile = {
       originalName: file.fileName || file.originalName,
       fileType: getFileTypeFromUrl(file.fileUrl),
+      filePath: file.fileUrl, // Store original file path
       fileUrl: file.fileUrl
+        ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${file.fileUrl.replace(/^\/+/, '')}`
+        : file.fileUrl
     };
     setPreviewDialog({ open: true, file: previewFile });
   };
 
   const handleFileDownload = (file) => {
     try {
-      // Direct download from fileUrl (since there's no download API)
-      if (!file.fileUrl) {
+      // Use original file path from backend
+      const filePath = file.filePath || file.fileUrl;
+      
+      if (!filePath) {
         console.error('File URL not available');
         return;
       }
 
       const link = document.createElement('a');
-      link.href = file.fileUrl;
+      // Check if filePath already contains a full URL
+      if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+        link.href = filePath;
+      } else {
+        link.href = `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${filePath.replace(/^\/+/, '')}`;
+      }
+      
+      // Force download behavior
       link.setAttribute('download', file.fileName || file.originalName);
       link.setAttribute('target', '_blank');
       document.body.appendChild(link);
