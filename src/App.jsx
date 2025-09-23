@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfile from "./pages/UserProfile";
 import UserProfileEdit from "./pages/UserProfile/UserProfileEdit";
 import Employee from "./pages/EmployeePage/Employee";
+import Types from "./pages/Types";
 
 export default function App() {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -26,6 +27,12 @@ export default function App() {
                   <Employee />
                 </ProtectedRoute>
               } />
+              <Route path="/masters/types" element={
+                <ProtectedRoute requiredRoles={['admin', 'super_admin']}>
+                  <Types />
+                </ProtectedRoute>
+              } />
+
               <Route path="/" element={<UserProfile />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/profile/:userId" element={<UserProfile />} />

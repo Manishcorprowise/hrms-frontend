@@ -139,17 +139,6 @@ const DocumentsTab = ({ userFiles, filesLoading, onEdit, employeeDetails }) => {
             >
               📁 Documents ({(userFiles || []).length})
             </Typography>
-            <Button 
-              variant="contained" 
-              startIcon={<EditIcon />}
-              onClick={() => setShowUploadDialog(true)}
-              sx={{ 
-                px: { xs: 2, sm: 3 }, 
-                py: { xs: 1, sm: 1.5 }
-              }}
-            >
-              Manage Documents
-            </Button>
           </Box>
 
           {/* Grouped Documents by Category */}

@@ -248,6 +248,43 @@ export const apiService = {
       throw error;
     }
   },
+  // Master data APIs - Types
+  async createType(payload) {
+    try {
+      const endpoint = "/master/create-type";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error creating type:", error);
+      throw error;
+    }
+  },
+  async getTypes() {
+    try {
+      const endpoint = "/master/get-types";
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error getting type:", error);
+      throw error;
+    }
+  },
+  async updateType(payload) {
+    try {
+      const endpoint = "/master/update-type";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error updateing type:", error);
+      throw error;
+    }
+  },
+  async deleteType(payload) {
+    try {
+      const endpoint = "/master/delete-type";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error delete type:", error);
+      throw error;
+    }
+  },
  
   
 };
