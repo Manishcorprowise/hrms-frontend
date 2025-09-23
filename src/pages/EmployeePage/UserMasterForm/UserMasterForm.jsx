@@ -142,7 +142,7 @@ export const UserMasterFrom = ({
       console.log(response);
       if (response.status === 200) {
         try {
-          response = await apiService.updateEmployee(dataToEdit._id, {kadCred:true});
+          const response = await apiService.updateEmployee(dataToEdit._id, {kadCred:true});
           console.log(response);
         } catch (error) {
           console.log(error);

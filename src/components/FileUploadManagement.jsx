@@ -555,7 +555,7 @@ const FileUploadManagement = ({
                   {/* Compact Uploaded Files List */}
                   <Stack spacing={0.5}>
                     {uploadedFiles.slice(0, 2).map((file) => (
-                      <Box key={file._id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 0.5, bgcolor: 'success.light', bgcolor: 'rgba(76, 175, 80, 0.1)', borderRadius: 0.5 }}>
+                      <Box key={file._id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 0.5, bgcolor: 'success.light', borderRadius: 0.5 }}>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="caption" noWrap sx={{ fontSize: '0.75rem' }}>
                             {file.fileName || file.originalName}
