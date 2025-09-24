@@ -214,6 +214,16 @@ export const apiService = {
     }
   },
 
+  async getAllManagers() {
+    try {
+      const endpoint = "/employee/all-managers";
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error fetching all managers:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   async getEmployeeById(employeeId) {
     try {
       const endpoint = `/employee/get-user/${employeeId}`;
@@ -318,6 +328,16 @@ export const apiService = {
       return await this.hitApi("POST", endpoint, payload);
     } catch (error) {
       console.error("Error delete type:", error);
+      throw error;
+    }
+  },
+
+  async getOptionByTypeCodes(typeCodes) {
+    try {
+      const endpoint = `/master/get-option-by-typecodes?typeCode=${typeCodes}`;
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error getting options by type codes:", error);
       throw error;
     }
   },

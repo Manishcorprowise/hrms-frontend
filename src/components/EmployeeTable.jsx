@@ -252,16 +252,36 @@ const EmployeeTable = ({ employees, onEdit, onDelete, onView, loading = false, o
                   Manager
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                <TableSortLabel
-                  active={orderBy === 'role'}
-                  direction={orderBy === 'role' ? order : 'asc'}
-                  onClick={() => handleSort('role')}
-                  sx={{ color: 'white', '&:hover': { color: 'white' } }}
-                >
-                  Role
-                </TableSortLabel>
-              </TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
+                  <TableSortLabel
+                    active={orderBy === 'role'}
+                    direction={orderBy === 'role' ? order : 'asc'}
+                    onClick={() => handleSort('role')}
+                    sx={{ color: 'white', '&:hover': { color: 'white' } }}
+                  >
+                    Role
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
+                  <TableSortLabel
+                    active={orderBy === 'branch'}
+                    direction={orderBy === 'branch' ? order : 'asc'}
+                    onClick={() => handleSort('branch')}
+                    sx={{ color: 'white', '&:hover': { color: 'white' } }}
+                  >
+                    Branch
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
+                  <TableSortLabel
+                    active={orderBy === 'branch'}
+                    direction={orderBy === 'branch' ? order : 'asc'}
+                    onClick={() => handleSort('branch')}
+                    sx={{ color: 'white', '&:hover': { color: 'white' } }}
+                  >
+                    KAD Cred
+                  </TableSortLabel>
+                </TableCell>
               <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                 <TableSortLabel
                   active={orderBy === 'dateOfJoining'}
@@ -354,6 +374,20 @@ const EmployeeTable = ({ employees, onEdit, onDelete, onView, loading = false, o
                     size="small"
                     variant="outlined"
                   />
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2">
+                      {employee.branch || 'N/A'}
+                    </Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2">
+                      {employee.kadCred ? 'Yes' : 'No'}
+                    </Typography>
+                  </Box>
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>

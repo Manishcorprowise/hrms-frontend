@@ -36,8 +36,9 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [branchOptions, setBranchOptions] = useState([]);
   const { user } = useSelector(state => state.auth);
-  
+
   const {
     control,
     handleSubmit,
@@ -57,6 +58,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
       role: editingEmployee?.role || '',
       department: editingEmployee?.department || '',
       manager: editingEmployee?.manager || '',
+      branch: editingEmployee?.branch || '',
       isActive: editingEmployee?.isActive !== undefined ? editingEmployee.isActive : true,
       endDate: editingEmployee?.endDate ? editingEmployee.endDate.split('T')[0] : '',
       managerId: editingEmployee?.managerId || '',
@@ -76,6 +78,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         role: editingEmployee.role || '',
         department: editingEmployee.department || '',
         manager: editingEmployee.manager || '',
+        branch: editingEmployee.branch || '',
         isActive: editingEmployee.isActive !== undefined ? editingEmployee.isActive : true,
         endDate: editingEmployee.endDate ? editingEmployee.endDate.split('T')[0] : '',
         managerId: editingEmployee.managerId || (typeof editingEmployee.manager === 'string' && editingEmployee.manager ? employees.find(emp => emp.employeeName === editingEmployee.manager)?._id || '' : ''),
@@ -91,6 +94,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         role: '',
         department: '',
         manager: '',
+        branch: '',
         isActive: true,
         endDate: '',
         managerId: '',
@@ -101,6 +105,36 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
   // Watch the isActive field to show/hide end date
   const isActive = watch('isActive');
 
+  // Fetch branch options when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      fetchBranchOptions();
+    }
+  }, [open]);
+
+
+  const fetchBranchOptions = async () => {
+    try {
+      const response = await apiService.getOptionByTypeCodes(1);
+      if (response.status) {
+        setBranchOptions(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching options:", error);
+    }
+  }
+
+  // const fetchManagerOptions = async () => {
+  //   try {
+  //     const response = await apiService.getAllManagers();
+  //     if (response.status) {
+  //       setManagerOptions(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching options:", error);
+  //   }
+  // }
+
   const onSubmit = async (data) => {
     try {
       const isValid = await trigger();
@@ -109,7 +143,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         setShowError(true);
         return;
       }
-      
+
       // Transform the data for API submission
       const submitData = {
         ...data,
@@ -117,7 +151,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         managerId: undefined // Remove managerId field
       };
       delete submitData.managerId; // Clean up the managerId field
-      
+
       let response;
       if (editingEmployee) {
         // Update existing employee
@@ -126,7 +160,7 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
         // Create new employee
         response = await apiService.createEmployee(submitData);
       }
-      
+
       if (response && response.message) {
         setShowSuccess(true);
         onSave?.(data);
@@ -154,10 +188,10 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
 
   return (
     <>
-      <Dialog 
-        open={open} 
-        onClose={handleClose} 
-        maxWidth="md" 
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="md"
         fullWidth
         PaperProps={{
           sx: {
@@ -195,10 +229,10 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
           >
             {/* Error Alert */}
             {Object.keys(errors).length > 0 && (
-              <Alert 
-                severity="error" 
+              <Alert
+                severity="error"
                 icon={<ErrorIcon />}
-                sx={{ 
+                sx={{
                   mb: 3,
                   borderRadius: 2,
                 }}
@@ -338,29 +372,86 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                 />
               </Grid>
 
-              {/* Role */}
-              <Grid item xs={12}>
-                <FormControl component="fieldset" error={!!errors.role}>
-                  <FormLabel component="legend">Select Role:</FormLabel>
-                  <Controller
-                    name="role"
-                    control={control}
-                    rules={{ required: "Please select a role" }}
-                    render={({ field }) => (
-                      <RadioGroup {...field} row>
-                        {user.role === 'super_admin' && <FormControlLabel value="admin" control={<Radio />} label="Admin" />}
-                        <FormControlLabel value="manager" control={<Radio />} label="Manager" />
-                        <FormControlLabel value="employee" control={<Radio />} label="Employee" />
-                      </RadioGroup>
-                    )}
-                  />
-                  {errors.role && (
-                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                      {errors.role.message}
-                    </Typography>
+              {/* Branch Selection */}
+              <Grid item xs={12} sm={6} sx={{ minWidth: 160 }}>
+                <Controller
+                  name="branch"
+                  control={control}
+                  rules={{ required: 'Branch is required' }}
+                  render={({ field }) => (
+                    <FormControl fullWidth error={!!errors.branch} variant="outlined">
+                      <InputLabel>Select Branch</InputLabel>
+                      <Select
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        label="Select Branch"
+                        displayEmpty
+                        variant="outlined"
+                        sx={{
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgba(0, 0, 0, 0.23)',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgba(0, 0, 0, 0.87)',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgb(33, 44, 101)',
+                            borderWidth: 2,
+                          },
+                        }}
+                        renderValue={(selected) => {
+                          if (!selected) return '';
+                          const selectedBranch = branchOptions.find(branch => branch.name === selected);
+                          return selectedBranch ? selectedBranch.name : selected;
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>No Branch Selected</em>
+                        </MenuItem>
+                        {branchOptions.map((branch) => (
+                          <MenuItem key={branch._id || branch.id} value={branch.name}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: '50%',
+                                  backgroundColor: 'secondary.main',
+                                  color: 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600
+                                }}
+                              >
+                                {branch.name.charAt(0).toUpperCase()}
+                              </Box>
+                              <Box>
+                                <Typography variant="body2" fontWeight={500}>
+                                  {branch.name}
+                                </Typography>
+                                {branch.description && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    {branch.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errors.branch && (
+                        <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                          {errors.branch.message}
+                        </Typography>
+                      )}
+                    </FormControl>
                   )}
-                </FormControl>
+                />
               </Grid>
+
 
               {/* Manager Selection */}
               <Grid item xs={12} sm={6} sx={{ minWidth: 160 }}>
@@ -391,19 +482,19 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                         }}
                         renderValue={(selected) => {
 
-                          
+
                           // First try to find by ID
                           const selectedEmployee = employees.find(emp => emp._id === selected);
                           if (selectedEmployee) {
                             return selectedEmployee.employeeName;
                           }
-                          
+
                           // If not found by ID, try to find by name (for backward compatibility)
                           const selectedByName = employees.find(emp => emp.employeeName === selected);
                           if (selectedByName) {
                             return selectedByName.employeeName;
                           }
-                          
+
                           // If still not found, return the selected value
                           return selected;
                         }}
@@ -469,6 +560,29 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                   )}
                 />
               </Grid>
+              {/* Role */}
+              <Grid item xs={12}>
+                <FormControl component="fieldset" error={!!errors.role}>
+                  <FormLabel component="legend">Select Role:</FormLabel>
+                  <Controller
+                    name="role"
+                    control={control}
+                    rules={{ required: "Please select a role" }}
+                    render={({ field }) => (
+                      <RadioGroup {...field} row>
+                        {user.role === 'super_admin' && <FormControlLabel value="admin" control={<Radio />} label="Admin" />}
+                        <FormControlLabel value="manager" control={<Radio />} label="Manager" />
+                        <FormControlLabel value="employee" control={<Radio />} label="Employee" />
+                      </RadioGroup>
+                    )}
+                  />
+                  {errors.role && (
+                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                      {errors.role.message}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
 
               {/* Active Status Toggle */}
               <Grid item xs={12}>
@@ -520,8 +634,8 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
                   <Controller
                     name="endDate"
                     control={control}
-                    rules={{ 
-                      required: !isActive ? 'End date is required when employee is inactive' : false 
+                    rules={{
+                      required: !isActive ? 'End date is required when employee is inactive' : false
                     }}
                     render={({ field }) => (
                       <TextField
@@ -544,16 +658,16 @@ export default function AddEmployee({ open, onClose, onSave, employees = [], edi
 
         {/* Footer */}
         <DialogActions sx={{ p: 1, gap: 1 }}>
-          <Button 
+          <Button
             onClick={handleClose}
             disabled={isSubmitting}
             variant="outlined"
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            form="employee-form" 
+          <Button
+            type="submit"
+            form="employee-form"
             variant="contained"
             disabled={isSubmitting}
             startIcon={<PersonAddIcon />}

@@ -251,7 +251,7 @@ const FileUploadManagement = ({
       fileType: file.type || getFileTypeFromUrl(file.fileUrl || file.preview || file.dataUrl),
       filePath: file.fileUrl, // Store original file path
       fileUrl: file.fileUrl
-        ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${file.fileUrl.replace(/^\/+/, '')}`
+        ? `${apiUrl.apiEndPoint.replace('/api')}/${file.fileUrl.replace(/^\/+/, '')}`
         : file.preview || file.dataUrl
     };
     console.log('Preview File:', previewFile);
