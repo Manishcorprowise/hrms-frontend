@@ -285,6 +285,41 @@ export const apiService = {
       throw error;
     }
   },
- 
+ async createOption(payload) {
+    try {
+      const endpoint = "/master/create-optiontype";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error creating type:", error);
+      throw error;
+    }
+  },
+  async getOption() {
+    try {
+      const endpoint = "/master/get-optiontype";
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error getting type:", error);
+      throw error;
+    }
+  },
+  async updateOption(payload) {
+    try {
+      const endpoint = "/master/update-optiontype";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error updateing type:", error);
+      throw error;
+    }
+  },
+  async deleteOption(payload) {
+    try {
+      const endpoint = "/master/delete-optiontype";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error delete type:", error);
+      throw error;
+    }
+  },
   
 };

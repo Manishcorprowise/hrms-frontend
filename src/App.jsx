@@ -9,6 +9,7 @@ import UserProfile from "./pages/UserProfile";
 import UserProfileEdit from "./pages/UserProfile/UserProfileEdit";
 import Employee from "./pages/EmployeePage/Employee";
 import Types from "./pages/Types";
+import Options from "./pages/Options";
 
 export default function App() {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -30,6 +31,11 @@ export default function App() {
               <Route path="/masters/types" element={
                 <ProtectedRoute requiredRoles={['admin', 'super_admin']}>
                   <Types />
+                </ProtectedRoute>
+              } />
+              <Route path="/masters/options" element={
+                <ProtectedRoute requiredRoles={['admin', 'super_admin']}>
+                  <Options />
                 </ProtectedRoute>
               } />
 

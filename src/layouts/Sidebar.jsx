@@ -69,7 +69,8 @@ import {
         hasSubItems: true,
         subItems: [
           { text: "Types", icon: <CheckCircleIcon />, path: "/masters/types" },
-          { text: "Status Types", icon: <BusinessIcon />, path: "/masters/status-types" },
+          { text: "Options", icon: <BusinessIcon />, path: "/masters/options" },
+          // { text: "Status Types", icon: <BusinessIcon />, path: "/masters/status-types" },
         ]
       }
       // { 
