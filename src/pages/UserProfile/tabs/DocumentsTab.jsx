@@ -80,13 +80,26 @@ const DocumentsTab = ({ userFiles, filesLoading, onEdit, employeeDetails }) => {
   };
 
   const handleFilePreview = (file) => {
+    let constructedUrl;
+    if (file.fileUrl) {
+      if (file.fileUrl.startsWith('http://') || file.fileUrl.startsWith('https://')) {
+        // If it's already a full URL, use it as is
+        constructedUrl = file.fileUrl;
+      } else {
+        // If it's a relative path, construct the full URL
+        // Remove /api from the end of apiEndPoint and add /api/files
+        const baseUrl = apiUrl.apiEndPoint.replace(/\/api$/, '');
+        constructedUrl = `${baseUrl}/api/files/${file.fileUrl.replace(/^\/+/, '')}`;
+      }
+    } else {
+      constructedUrl = file.fileUrl;
+    }
+    
     const previewFile = {
       originalName: file.fileName || file.originalName,
       fileType: getFileTypeFromUrl(file.fileUrl),
       filePath: file.fileUrl, // Store original file path
-      fileUrl: file.fileUrl
-        ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${file.fileUrl.replace(/^\/+/, '')}`
-        : file.fileUrl
+      fileUrl: constructedUrl
     };
     setPreviewDialog({ open: true, file: previewFile });
   };
@@ -106,7 +119,9 @@ const DocumentsTab = ({ userFiles, filesLoading, onEdit, employeeDetails }) => {
       if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
         link.href = filePath;
       } else {
-        link.href = `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${filePath.replace(/^\/+/, '')}`;
+        // Remove /api from the end of apiEndPoint and add /api/files
+        const baseUrl = apiUrl.apiEndPoint.replace(/\/api$/, '');
+        link.href = `${baseUrl}/api/files/${filePath.replace(/^\/+/, '')}`;
       }
       
       // Force download behavior

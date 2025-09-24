@@ -245,16 +245,27 @@ const FileUploadManagement = ({
 
   const handleFilePreview = (file) => {
     // Handle both selected files and uploaded files
-    console.log('File:', file);
+    let constructedUrl;
+    if (file.fileUrl) {
+      if (file.fileUrl.startsWith('http://') || file.fileUrl.startsWith('https://')) {
+        // If it's already a full URL, use it as is
+        constructedUrl = file.fileUrl;
+      } else {
+        // If it's a relative path, construct the full URL
+        // Remove /api from the end of apiEndPoint and add /api/files
+        const baseUrl = apiUrl.apiEndPoint.replace(/\/api$/, '');
+        constructedUrl = `${baseUrl}/api/files/${file.fileUrl.replace(/^\/+/, '')}`;
+      }
+    } else {
+      constructedUrl = file.preview || file.dataUrl;
+    }
+    
     const previewFile = {
       originalName: file.fileName || file.name || file.originalName,
       fileType: file.type || getFileTypeFromUrl(file.fileUrl || file.preview || file.dataUrl),
       filePath: file.fileUrl, // Store original file path
-      fileUrl: file.fileUrl
-        ? `${apiUrl.apiEndPoint.replace('/api')}/${file.fileUrl.replace(/^\/+/, '')}`
-        : file.preview || file.dataUrl
+      fileUrl: constructedUrl
     };
-    console.log('Preview File:', previewFile);
     setPreviewDialog({ open: true, file: previewFile });
   };
 
@@ -287,7 +298,16 @@ const FileUploadManagement = ({
       }
 
       const link = document.createElement('a');
-      link.href = file.fileUrl;
+      
+      // Check if filePath already contains a full URL
+      if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+        link.href = filePath;
+      } else {
+        // Remove /api from the end of apiEndPoint and add /api/files
+        const baseUrl = apiUrl.apiEndPoint.replace(/\/api$/, '');
+        link.href = `${baseUrl}/api/files/${filePath.replace(/^\/+/, '')}`;
+      }
+      
       link.setAttribute('download', file.fileName || file.originalName);
       link.setAttribute('target', '_blank');
       document.body.appendChild(link);
