@@ -164,8 +164,6 @@ const FileUploadManagement = ({
 
   const uploadFilesByCategory = async (categoryId) => {
     const files = selectedFiles[categoryId] || [];
-    console.log('Upload function called for category:', categoryId);
-    console.log('Files in category:', files);
     
     if (files.length === 0) {
       console.log('No files to upload for category:', categoryId);

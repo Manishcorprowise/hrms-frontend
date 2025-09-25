@@ -10,6 +10,8 @@ import UserProfileEdit from "./pages/UserProfile/UserProfileEdit";
 import Employee from "./pages/EmployeePage/Employee";
 import Types from "./pages/Types";
 import Options from "./pages/Options";
+import UserRequest from "./pages/Request/UserRequest";
+import AdminRequest from "./pages/Request/AdminRequest";
 
 export default function App() {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -24,7 +26,7 @@ export default function App() {
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/employees" element={
-                <ProtectedRoute requiredRoles={['admin', 'super_admin','manager']}>
+                <ProtectedRoute requiredRoles={['admin', 'super_admin', 'manager']}>
                   <Employee />
                 </ProtectedRoute>
               } />
@@ -43,6 +45,8 @@ export default function App() {
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/profile/:userId" element={<UserProfile />} />
               <Route path="/profile/edit" element={<UserProfileEdit />} />
+              <Route path="/user-request" element={<UserRequest />} />
+              <Route path="/request" element={<AdminRequest />} />
             </Routes>
           </AdminLayout>
         </ProtectedRoute>

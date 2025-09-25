@@ -192,18 +192,14 @@ export default function Login() {
                   name="email"
                   control={control}
                   rules={{
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
+                    required: 'Email/Username is required',
                   }}
                   render={({ field }) => (
                     <TextField
                       {...field}
                       fullWidth
-                      label="Email Address"
-                      type="email"
+                      label="Email/Username"
+                      type="text"
                       error={!!errors.email}
                       helperText={errors.email?.message}
                       sx={{ mb: 3 }}

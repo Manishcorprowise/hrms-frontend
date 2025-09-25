@@ -57,6 +57,18 @@ import {
         roles: ['admin', 'super_admin', 'employee','manager']
       },
       { 
+        text: "My Request", 
+        icon: <RouteIcon />, 
+        path: "/user-request",
+        roles: ['admin', 'super_admin', 'employee','manager']
+      },
+      {
+        text:"Requests", 
+        icon:<CheckCircleIcon />,
+        path:"/request",
+        roles: ['admin', 'super_admin', 'manager']
+      },
+      { 
         text: "Employees", 
         icon: <PeopleIcon />, 
         path: "/employees",
