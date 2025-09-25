@@ -341,5 +341,43 @@ export const apiService = {
       throw error;
     }
   },
+
+  // Request APIs
+  async createRequest(payload) {
+    try {
+      const endpoint = "/request/create-request";
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error creating request:", error);
+      throw error;
+    }
+  },
+  async getUserRequest() {
+    try {
+      const endpoint = `/request/get-request`;
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error getting user request:", error);
+      throw error;
+    }
+  },
+  async getRequestsForManager() {
+    try {
+      const endpoint = `/request/get-requests-for-manager`;
+      return await this.hitApi("GET", endpoint);
+    } catch (error) {
+      console.error("Error getting manager requests:", error);
+      throw error;
+    }
+  },
+  async respondRequest(payload) {
+    try {
+      const endpoint = `/request/respond-request`;
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error responding to request:", error);
+      throw error;
+    }
+  },
   
 };
