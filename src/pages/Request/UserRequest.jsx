@@ -56,6 +56,7 @@ import {
     InsertDriveFile as FileIcon,
 } from '@mui/icons-material';
 import { apiService } from '../../apiservice/api';
+import { Base64FilePreview, FilePathPreview } from '../../components/FilePreview';
 
 export default function UserRequest() {
     const theme = useTheme();
@@ -167,8 +168,21 @@ export default function UserRequest() {
                 file: selectedItem.file || '', 
                 fileName: selectedItem.fileName || '' 
             });
-            setSelectedFile(null);
-            setFilePreview(null);
+            
+            // Load existing file information if available
+            if (selectedItem.fileName && selectedItem.filePath) {
+                setSelectedFile({
+                    name: selectedItem.fileName,
+                    filePath: selectedItem.filePath,
+                    type: selectedItem.fileName.split('.').pop().toLowerCase(),
+                    size: 0 // We don't have size info from database
+                });
+                setFilePreview(null); // No preview for existing files in edit mode
+            } else {
+                setSelectedFile(null);
+                setFilePreview(null);
+            }
+            
             setErrors({});
             setDialogOpen(true);
         }
@@ -237,7 +251,21 @@ export default function UserRequest() {
 
     const handlePreviewFile = (file) => {
         if (file) {
-            setPreviewDialog({ open: true, file: file });
+            // For existing files, we need to create a proper file object
+            if (file.filePath) {
+                // This is an existing file from database
+                setPreviewDialog({ 
+                    open: true, 
+                    file: {
+                        name: file.name,
+                        filePath: file.filePath,
+                        type: file.type
+                    }
+                });
+            } else {
+                // This is a new file being uploaded
+                setPreviewDialog({ open: true, file: file });
+            }
         }
     };
 
@@ -581,7 +609,7 @@ export default function UserRequest() {
                                         <TableCell align="center">
                                             {item.fileName ? (
                                                 <IconButton
-                                                    onClick={() => handleFilePreview({ name: item.fileName, type: 'file' })}
+                                                    onClick={() => handlePreviewFile({ name: item.fileName, filePath: item.filePath, type: 'file' })}
                                                     size="small"
                                                     color="primary"
                                                 >
@@ -861,15 +889,16 @@ export default function UserRequest() {
                                             </Typography>
                                         </Box>
                                         <Box sx={{ display: 'flex', gap: 1 }}>
-                        {filePreview && (
-                            <IconButton
-                                size="small"
-                                onClick={() => handlePreviewFile(selectedFile)}
-                                color="primary"
-                            >
-                                <PreviewIcon />
-                            </IconButton>
-                        )}
+                                            {/* Show preview button for existing files or files with preview */}
+                                            {(filePreview || selectedFile.filePath) && (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handlePreviewFile(selectedFile)}
+                                                    color="primary"
+                                                >
+                                                    <PreviewIcon />
+                                                </IconButton>
+                                            )}
                                             <IconButton
                                                 size="small"
                                                 onClick={handleRemoveFile}
@@ -947,59 +976,12 @@ export default function UserRequest() {
             </Dialog>
 
             {/* File Preview Dialog */}
-            <Dialog 
-                open={previewDialog.open} 
+            <FilePathPreview
+                path={previewDialog.file?.filePath}
+                fileName={previewDialog.file?.name}
+                open={previewDialog.open}
                 onClose={() => setPreviewDialog({ open: false, file: null })}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        File Preview
-                        <IconButton onClick={() => setPreviewDialog({ open: false, file: null })}>
-                            <CloseIcon />
-                        </IconButton>
-                    </Box>
-                </DialogTitle>
-                <DialogContent>
-                        {previewDialog.file && (
-                            <Box>
-                                <Typography variant="h6" gutterBottom>
-                                    {previewDialog.file.name || 'Unknown file'}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    {previewDialog.file.size ? `Size: ${formatFileSize(previewDialog.file.size)}` : ''} 
-                                    {previewDialog.file.type ? ` | Type: ${previewDialog.file.type}` : ''}
-                                </Typography>
-                                {previewDialog.file.dataUrl && previewDialog.file.type && previewDialog.file.type.startsWith('image/') ? (
-                                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                                        <img
-                                            src={previewDialog.file.dataUrl}
-                                            alt={previewDialog.file.name || 'Preview'}
-                                            style={{ 
-                                                maxWidth: '100%', 
-                                                maxHeight: '500px',
-                                                borderRadius: '8px'
-                                            }}
-                                        />
-                                    </Box>
-                                ) : (
-                                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                                        <Typography variant="body1" sx={{ mb: 2 }}>
-                                            {previewDialog.file.dataUrl ? 'Preview not available for this file type' : 'File preview not available'}
-                                        </Typography>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                            {getFileIcon(previewDialog.file.type)}
-                                            <Typography variant="body2" color="text.secondary">
-                                                {previewDialog.file.name || 'Unknown file'}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                )}
-                            </Box>
-                        )}
-                </DialogContent>
-            </Dialog>
+            />
 
         </Box>
     );

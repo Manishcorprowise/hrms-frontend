@@ -56,6 +56,7 @@ import {
   Person as PersonIcon
 } from '@mui/icons-material';
 import { apiService } from '../../apiservice/api';
+import { Base64FilePreview, FilePathPreview } from '../../components/FilePreview';
 
 export default function AdminRequest() {
   const theme = useTheme();
@@ -284,7 +285,21 @@ export default function AdminRequest() {
 
   const handlePreviewFile = (file) => {
     if (file) {
-      setPreviewDialog({ open: true, file: file });
+      // For existing files, we need to create a proper file object
+      if (file.filePath) {
+        // This is an existing file from database
+        setPreviewDialog({ 
+          open: true, 
+          file: {
+            name: file.name,
+            filePath: file.filePath,
+            type: file.type
+          }
+        });
+      } else {
+        // This is a new file being uploaded
+        setPreviewDialog({ open: true, file: file });
+      }
     }
   };
 
@@ -515,7 +530,7 @@ export default function AdminRequest() {
                           <TableCell align="center">
                             {item.fileName ? (
                               <IconButton
-                                onClick={() => handleFilePreview({ name: item.fileName, type: 'file' })}
+                                onClick={() => handlePreviewFile({ name: item.fileName, filePath: item.filePath, type: 'file' })}
                                 size="small"
                                 color="primary"
                               >
@@ -795,54 +810,21 @@ export default function AdminRequest() {
       </Dialog>
 
       {/* File Preview Dialog */}
-      <Dialog open={previewDialog.open} onClose={() => setPreviewDialog({ open: false, file: null })} maxWidth="md" fullWidth>
-        <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            File Preview
-            <IconButton onClick={() => setPreviewDialog({ open: false, file: null })}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {previewDialog.file && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                {previewDialog.file.name || 'Unknown file'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {previewDialog.file.size ? `Size: ${formatFileSize(previewDialog.file.size)}` : ''}
-                {previewDialog.file.type ? ` | Type: ${previewDialog.file.type}` : ''}
-              </Typography>
-              {previewDialog.file.dataUrl && previewDialog.file.type && previewDialog.file.type.startsWith('image/') ? (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <img
-                    src={previewDialog.file.dataUrl}
-                    alt={previewDialog.file.name || 'Preview'}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '500px',
-                      borderRadius: '8px'
-                    }}
-                  />
-                </Box>
-              ) : (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <Typography variant="body1" sx={{ mb: 2 }}>
-                    {previewDialog.file.dataUrl ? 'Preview not available for this file type' : 'File preview not available'}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                    {getFileIcon(previewDialog.file.type)}
-                    <Typography variant="body2" color="text.secondary">
-                      {previewDialog.file.name || 'Unknown file'}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
+      {previewDialog.file?.filePath ? (
+        <FilePathPreview
+          path={previewDialog.file.filePath}
+          fileName={previewDialog.file.name}
+          open={previewDialog.open}
+          onClose={() => setPreviewDialog({ open: false, file: null })}
+        />
+      ) : (
+        <Base64FilePreview
+          base64Data={previewDialog.file?.dataUrl}
+          fileName={previewDialog.file?.name}
+          open={previewDialog.open}
+          onClose={() => setPreviewDialog({ open: false, file: null })}
+        />
+      )}
 
       {/* Snackbar for notifications */}
       <Snackbar

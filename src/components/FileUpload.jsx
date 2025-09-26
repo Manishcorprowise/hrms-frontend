@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { apiUrl } from '../apiservice/apiConfig';
+import { Base64FilePreview } from './FilePreview';
 
 const FileUpload = ({ 
   employeeId, 
@@ -379,60 +380,15 @@ const FileUpload = ({
       </Dialog>
 
       {/* Preview Dialog */}
-      <Dialog 
-        open={previewDialog.open} 
+      <Base64FilePreview
+        base64Data={previewDialog.file?.filePath 
+          ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${previewDialog.file.filePath}`
+          : previewDialog.file ? URL.createObjectURL(previewDialog.file) : null
+        }
+        fileName={previewDialog.file?.originalName}
+        open={previewDialog.open}
         onClose={() => setPreviewDialog({ open: false, file: null })}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            File Preview
-            <IconButton onClick={() => setPreviewDialog({ open: false, file: null })}>
-              <Close />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {previewDialog.file && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                {previewDialog.file.originalName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Size: {formatFileSize(previewDialog.file.fileSize || previewDialog.file.size)} | 
-                Type: {previewDialog.file.mimeType || previewDialog.file.type}
-              </Typography>
-              {(previewDialog.file.mimeType || previewDialog.file.type)?.startsWith('image/') ? (
-                  <Box sx={{ mt: 2, textAlign: 'center' }}>
-                    <img
-                      src={previewDialog.file.filePath 
-                        ? `${apiUrl.apiEndPoint.replace('/api', '/api/files')}/${previewDialog.file.filePath}`
-                        : URL.createObjectURL(previewDialog.file)
-                      }
-                      alt={previewDialog.file.originalName}
-                      style={{ maxWidth: '100%', maxHeight: '500px' }}
-                    />
-                  </Box>
-              ) : (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <Typography variant="body1">
-                    Preview not available for this file type
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<Download />}
-                    onClick={() => handleDownload(previewDialog.file)}
-                    sx={{ mt: 2 }}
-                  >
-                    Download File
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
+      />
     </Box>
   );
 };

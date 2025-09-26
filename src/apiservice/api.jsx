@@ -361,6 +361,15 @@ export const apiService = {
       throw error;
     }
   },
+  async updateRequest(payload) {
+    try {
+      const endpoint = `/request/update-request`;
+      return await this.hitApi("POST", endpoint, payload);
+    } catch (error) {
+      console.error("Error updating request:", error);
+      throw error;
+    }
+  },
   async getRequestsForManager() {
     try {
       const endpoint = `/request/get-requests-for-manager`;

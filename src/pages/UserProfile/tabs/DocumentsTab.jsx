@@ -28,6 +28,7 @@ import {
   PictureAsPdf as PdfIcon
 } from '@mui/icons-material';
 import FileUploadManagement from '../../../components/FileUploadManagement';
+import { FilePathPreview } from '../../../components/FilePreview';
 import { apiService } from '../../../apiservice/api';
 import { apiUrl } from '../../../apiservice/apiConfig';
 
@@ -323,72 +324,11 @@ const DocumentsTab = ({ userFiles, filesLoading, onEdit, employeeDetails }) => {
       </Dialog>
 
       {/* File Preview Dialog */}
-      <Dialog
+      <FilePathPreview
+        path={previewDialog.file?.filePath}
         open={previewDialog.open}
         onClose={() => setPreviewDialog({ open: false, file: null })}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {previewDialog.file && getFileIcon(previewDialog.file.fileType)}
-            <Typography variant="h6" sx={{ ml: 1 }}>
-              {previewDialog.file?.originalName}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {previewDialog.file && (
-            <Box sx={{ textAlign: 'center' }}>
-              {previewDialog.file.fileType && previewDialog.file.fileType.startsWith('image/') ? (
-                <img
-                  src={previewDialog.file.fileUrl}
-                  alt={previewDialog.file.originalName}
-                  style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
-                />
-              ) : previewDialog.file.fileType === 'application/pdf' ? (
-                <iframe
-                  src={previewDialog.file.fileUrl}
-                  width="100%"
-                  height="70vh"
-                  style={{ border: 'none' }}
-                  title={previewDialog.file.originalName}
-                />
-              ) : (
-                <Box>
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    File Preview
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                    {previewDialog.file.originalName}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Preview not available for this file type. Click Download to view the file.
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button onClick={() => setPreviewDialog({ open: false, file: null })}>
-            Close
-          </Button>
-          {previewDialog.file && (
-            <Button
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              onClick={() => handleFileDownload(previewDialog.file)}
-            >
-              Download
-            </Button>
-          )}
-        </Box>
-      </Dialog>
+      />
     </Box>
   );
 };
