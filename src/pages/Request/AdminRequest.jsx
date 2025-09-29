@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -24,11 +24,6 @@ import {
   TablePagination,
   TableSortLabel,
   InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  OutlinedInput,
-  Stack,
   Avatar,
   alpha,
   useTheme,
@@ -38,42 +33,25 @@ import {
 } from '@mui/material';
 import {
   Settings as SettingsIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   MoreVert as MoreVertIcon,
   Search as SearchIcon,
-  CloudUpload as CloudUploadIcon,
-  Delete as DeleteFileIcon,
   Preview as PreviewIcon,
   Close as CloseIcon,
-  Image as ImageIcon,
-  Description as DescriptionIcon,
-  PictureAsPdf as PdfIcon,
-  InsertDriveFile as FileIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
-  Person as PersonIcon
+  EditNotifications
 } from '@mui/icons-material';
 import { apiService } from '../../apiservice/api';
 import { Base64FilePreview, FilePathPreview } from '../../components/FilePreview';
+import { useSelector } from 'react-redux';
 
 export default function AdminRequest() {
+  const { user } = useSelector(state => state.auth);
+  console.log(user);
+
   const theme = useTheme();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [formData, setFormData] = useState({
-    requestTypeCode: '',
-    description: '',
-    from: null,
-    to: null,
-    file: '',
-    fileName: ''
-  });
-  const [errors, setErrors] = useState({});
   const [globalFilter, setGlobalFilter] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -81,14 +59,7 @@ export default function AdminRequest() {
   const [order, setOrder] = useState('asc');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [requestOptions, setRequestOptions] = useState([]);
-  const [loadingOptions, setLoadingOptions] = useState(false);
-
-  // File upload states
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
   const [previewDialog, setPreviewDialog] = useState({ open: false, file: null });
-  const fileInputRef = useRef(null);
 
   // Response dialog states
   const [responseDialog, setResponseDialog] = useState({ open: false, request: null });
@@ -98,40 +69,18 @@ export default function AdminRequest() {
   // Snackbar states
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Fetch types data on component mount
+  // Fetch data on component mount
   useEffect(() => {
     fetchAdminRequests();
-    fetchRequestOptions();
   }, []);
-
-  const fetchRequestOptions = async () => {
-    if (loadingOptions) return;
-
-    try {
-      setLoadingOptions(true);
-      const response = await apiService.getOptionByTypeCodes(2);
-      if (response && response.status) {
-        setRequestOptions(response.data || []);
-      } else {
-        console.warn('No request options available');
-        setRequestOptions([]);
-      }
-    }
-    catch (error) {
-      console.error('Error fetching request types:', error);
-      setRequestOptions([]);
-    }
-    finally {
-      setLoadingOptions(false);
-    }
-  }
 
   const fetchAdminRequests = async () => {
     try {
       setLoading(true);
       const response = await apiService.getRequestsForManager();
       if (response.status) {
-        setData(response.data || []);
+        const filteredData = response.data.filter(item => item.managerId === user.id);
+        setData(filteredData || []);
       } else {
         console.error('Failed to fetch requests:', response.message);
         setData([]);
@@ -256,32 +205,6 @@ export default function AdminRequest() {
     }
   };
 
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedFile({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          dataUrl: reader.result
-        });
-        setFilePreview(reader.result);
-        setFormData(prev => ({ ...prev, fileName: file.name }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
-    setFilePreview(null);
-    setFormData(prev => ({ ...prev, file: '', fileName: '' }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
 
   const handlePreviewFile = (file) => {
     if (file) {
@@ -303,21 +226,6 @@ export default function AdminRequest() {
     }
   };
 
-  const getFileIcon = (fileType) => {
-    if (!fileType) return <FileIcon />;
-    if (fileType.startsWith('image/')) return <ImageIcon />;
-    if (fileType === 'application/pdf') return <PdfIcon />;
-    if (fileType.includes('word') || fileType.includes('document')) return <DescriptionIcon />;
-    return <FileIcon />;
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -586,7 +494,7 @@ export default function AdminRequest() {
         }}
       >
         <MenuItem onClick={handleRespond}>
-          <EditIcon sx={{ mr: 1 }} />
+          <EditNotifications sx={{ mr: 1 }} />
           Respond to Request
         </MenuItem>
       </Menu>
