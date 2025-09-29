@@ -79,8 +79,12 @@ export default function AdminRequest() {
       setLoading(true);
       const response = await apiService.getRequestsForManager();
       if (response.status) {
-        const filteredData = response.data.filter(item => item.managerId === user.id);
-        setData(filteredData || []);
+        if(user.role === 'admin' || user.role === 'super_admin'){
+          setData(response.data || []);
+        }else{
+          const filteredData = response.data.filter(item => item.managerId === user.id);
+          setData(filteredData || []);
+        }
       } else {
         console.error('Failed to fetch requests:', response.message);
         setData([]);
