@@ -15,16 +15,12 @@ import {
   import PeopleIcon from "@mui/icons-material/People";
   import WorkIcon from "@mui/icons-material/Work";
   import SettingsIcon from "@mui/icons-material/Settings";
-  import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
   import PersonIcon from "@mui/icons-material/Person";
   import ExpandLess from "@mui/icons-material/ExpandLess";
   import ExpandMore from "@mui/icons-material/ExpandMore";
   import RouteIcon from "@mui/icons-material/Route";
   import BusinessIcon from "@mui/icons-material/Business";
-  import SecurityIcon from "@mui/icons-material/Security";
-  import AccountTreeIcon from "@mui/icons-material/AccountTree";
-  import BuildIcon from "@mui/icons-material/Build";
-  import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+  import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
   import CheckCircleIcon from "@mui/icons-material/CheckCircle";
   import { Link, useLocation } from "react-router-dom";
   import { useSelector } from "react-redux";
@@ -84,13 +80,13 @@ import {
           { text: "Options", icon: <BusinessIcon />, path: "/masters/options" },
           // { text: "Status Types", icon: <BusinessIcon />, path: "/masters/status-types" },
         ]
-      }
-      // { 
-      //   text: "Projects", 
-      //   icon: <WorkIcon />, 
-      //   path: "/projects",
-      //   roles: ['admin', 'super_admin']
-      // },
+      },
+      { 
+        text: "Calendar", 
+        icon: <CalendarMonthIcon />, 
+        path: "/calendar",
+        roles: ['admin', 'super_admin','manager','employee']
+      },
       // { 
       //   text: "Settings", 
       //   icon: <SettingsIcon />, 

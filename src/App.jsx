@@ -12,6 +12,7 @@ import Types from "./pages/Types";
 import Options from "./pages/Options";
 import UserRequest from "./pages/Request/UserRequest";
 import AdminRequest from "./pages/Request/AdminRequest";
+import CalendarPage from "./pages/CalendarPage";
 
 export default function App() {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -47,6 +48,7 @@ export default function App() {
               <Route path="/profile/edit" element={<UserProfileEdit />} />
               <Route path="/user-request" element={<UserRequest />} />
               <Route path="/request" element={<AdminRequest />} />
+              <Route path="/calendar" element={<CalendarPage />} />
             </Routes>
           </AdminLayout>
         </ProtectedRoute>
